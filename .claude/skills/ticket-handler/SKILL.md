@@ -1,11 +1,13 @@
 ---
-description: Byg en BA-ticket fra start til slut: hent, plan, godkendelse, kode, tjek
+name: ticket-handler
+description: Byg en BA-ticket fra start til slut: hent, plan, godkendelse, kode, tjek. Use when the user asks to build or work on a BA ticket.
 argument-hint: <BA-123>
+disable-model-invocation: true
 ---
 
 # Ticket handler (BA)
 
-Byg Jira-ticketen `$ARGUMENTS` i dette repo. Input er en nøgle (`BA-123`), et tal (`123` = `BA-123`) eller et Jira-link. Er der intet input, så spørg og vent.
+Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i Cursor), så brug den ticket, brugeren nævner i beskeden. Input er en nøgle (`BA-123`), et tal (`123` = `BA-123`) eller et Jira-link. Er der intet input, så spørg og vent.
 
 **Plan først.** Skriv ingen kode, før brugeren har godkendt planen.
 

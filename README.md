@@ -1,5 +1,31 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## AI agent setup (Claude Code and Cursor)
+
+The group uses both Claude Code and Cursor. Both tools read the same files, so keep exactly one copy of each rule and skill.
+
+| What | Where | Read by |
+|---|---|---|
+| Project rules | `AGENTS.md` | Cursor directly. Claude Code through `CLAUDE.md`, which only contains `@AGENTS.md` |
+| Skills | `.claude/skills/<name>/SKILL.md` | Claude Code, and Cursor 2.4+ |
+
+Current skills:
+
+- `ticket-handler`: builds a BA ticket from start to finish. Run `/ticket-handler BA-123`.
+- `jira-ticket-tjek`: creates or checks Jira tickets in BA.
+
+### Add a rule
+
+Write it in `AGENTS.md`, below the `<!-- END:nextjs-agent-rules -->` line. `next dev` rewrites the block between the `BEGIN` and `END` markers, so anything inside it is lost.
+
+### Add a skill
+
+1. Create `.claude/skills/<name>/SKILL.md`.
+2. Start the file with frontmatter that has `name` (same as the folder name) and `description` (what the skill does and when to use it).
+3. Add `disable-model-invocation: true` if the skill should only run when someone calls it with `/<name>`.
+
+Do not copy rules or skills into `.cursor/` or `.agents/`. Copies drift apart.
+
 ## Getting Started
 
 First, run the development server:
