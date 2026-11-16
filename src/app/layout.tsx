@@ -1,3 +1,7 @@
+/** 
+ * Root layout: wraps the app in ClerkProvider and shows the header with sign-in and organization switcher. 
+ */
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import {
@@ -5,6 +9,7 @@ import {
   Show,
   SignInButton,
   SignUpButton,
+  OrganizationSwitcher,
   UserButton,
 } from "@clerk/nextjs";
 import { Suspense } from "react";
@@ -44,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
+                <OrganizationSwitcher />
                 <UserButton />
               </Show>
             </Suspense>
