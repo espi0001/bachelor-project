@@ -1,6 +1,6 @@
 ---
 name: jira-ticket-tjek
-description: Opret eller tjek Jira-tickets til kodeopgaver i BA: find eksisterende ticket først, og sørg for beskrivelse, acceptkriterier og ansvarlig. Use when code work needs a ticket or tickets in BA need checking.
+description: Opret eller tjek Jira-tickets til kodeopgaver i BA: find eksisterende ticket først, og sørg for beskrivelse, acceptkriterier, ansvarlig, epic, startdato og deadline. Use when code work needs a ticket or tickets in BA need checking.
 ---
 
 # Jira-ticket-tjek (BA)
@@ -39,6 +39,8 @@ Jira: esterworkwork.atlassian.net, projektnøgle **BA**.
 - **Ansvarlig:** Ester, Marcus eller Sebastian.
 - **Scope:** højst 1–2 dages arbejde. Ellers foreslå under-tickets.
 - **Forælder:** hører den under en overordnet ticket, så er den linket.
+- **Epic:** altid linket til den rigtige epic. Kode hører normalt under BA-8 "Develop 2: Udvikling". Find epics med `project = BA AND issuetype = Epic`.
+- **Startdato og deadline:** altid sat (felterne Start date og Due date). Datoerne tages fra "Ugeplan" eller "Plan" i Drive. Står de der ikke, så skriv 🟡 **[Claude] Afklar:** og spørg. Find aldrig selv på datoer.
 - **Blokeret?** Hvis noget mangler (design, data, svar fra Instant), står det i ticketen.
 
 ## Skabelon
@@ -46,6 +48,8 @@ Jira: esterworkwork.atlassian.net, projektnøgle **BA**.
 **Hvad:** …
 **Hvorfor:** …
 **Links:** Figma / krav-ID / mødeopsummering
+**Epic:** BA-…
+**Start:** dd/mm · **Deadline:** dd/mm
 
 **Acceptkriterier**
 - [ ] …
