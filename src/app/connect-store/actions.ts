@@ -1,0 +1,39 @@
+'use server';
+/** 
+ * Server action for connecting a Shopify store: validates the domain, checks app access and saves it for the org. 
+ */
+
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
+import { sql } from '@/lib/db';
+import { getAccessToken } from '@/lib/shopify/client';
+
+type State = { error?: string };
+
+export async function connectStore(_prev: State, formData: FormData): Promise<State> {
+  const { orgId } = await auth();
+  if (!orgId) return { error: 'Vælg en organisation først.' };
+
+  // Also guard here: the page redirects, but the action can be called directly.
+  const [existing] = await sql`SELECT 1 FROM store WHERE auth_org_id = ${orgId} LIMIT 1`;
+  if (existing) return { error: 'Organisationen har allerede forbundet en butik.' };
+
+  const domain = String(formData.get('domain')).trim().toLowerCase();
+  if (!domain.endsWith('.myshopify.com')) return { error: 'Domænet skal ende på .myshopify.com.' };
+
+  try {
+    await getAccessToken(domain);
+  } catch {
+    return { error: 'Appen kunne ikke få adgang til butikken.' };
+  }
+
+  try {
+    await sql`INSERT INTO store (shopify_domain, auth_org_id) VALUES (${domain}, ${orgId})`;
+  } catch (e) {
+    if ((e as { code?: string }).code === '23505') return { error: 'Butikken er allerede forbundet.' };
+    throw e;
+  }
+
+  // Outside try/catch: redirect() works by throwing, so a catch would swallow it.
+  redirect('/products');
+}
