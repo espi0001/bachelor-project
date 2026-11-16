@@ -19,7 +19,7 @@ export async function connectStore(_prev: State, formData: FormData): Promise<St
   if (existing) return { error: 'Organisationen har allerede forbundet en butik.' };
 
   const domain = String(formData.get('domain')).trim().toLowerCase();
-  if (!domain.endsWith('.myshopify.com')) return { error: 'Domænet skal ende på .myshopify.com.' };
+  if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.myshopify\.com$/.test(domain)) return { error: 'Angiv et gyldigt Shopify-domæne, fx mes-demo-store.myshopify.com.' };
 
   try {
     await getAccessToken(domain);
