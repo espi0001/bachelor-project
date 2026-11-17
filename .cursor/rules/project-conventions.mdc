@@ -1,0 +1,7 @@
+---
+description: Project conventions (file header comments). Full version in .claude/skills/project-conventions/SKILL.md
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: false
+---
+
+- Every new or touched file in src/ starts with a 1–2 line /** */ comment saying what the file does (after 'use client' / 'use server').

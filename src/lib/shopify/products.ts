@@ -1,3 +1,7 @@
+/** 
+ * Fetches all products and their images from a Shopify store via the Admin API. 
+ */
+
 import "server-only";
 import { shopifyAdminFetch } from "./client";
 
@@ -72,12 +76,13 @@ type ProductsQueryResult = {
 };
 
 /** Fetches every product in the store with its images (URL and dimensions). */
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(shopDomain: string): Promise<Product[]> {
   const products: Product[] = [];
   let after: string | null = null;
 
   do {
     const data: ProductsQueryResult = await shopifyAdminFetch<ProductsQueryResult>(
+      shopDomain,
       PRODUCTS_QUERY,
       { first: PRODUCTS_PAGE_SIZE, after, imagesFirst: IMAGES_PER_PRODUCT },
     );

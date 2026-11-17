@@ -1,6 +1,9 @@
+/** 
+ * Server-only client for Shopify's Admin GraphQL API: gets access tokens and sends queries per store. 
+ */
+
 import "server-only";
 
-// Server-only client for Shopify's Admin GraphQL API.
 // Auth: client credentials grant (Dev Dashboard app installed on our own dev store).
 // Docs: https://shopify.dev/docs/apps/build/dev-dashboard/get-api-access-tokens
 
@@ -11,25 +14,25 @@ const TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000;
 
 type CachedToken = { value: string; expiresAt: number };
 
-let cachedToken: CachedToken | null = null;
-let pendingToken: Promise<CachedToken> | null = null;
+// One token per store, keyed by shop domain (e.g. "mes-demo-store.myshopify.com").
+const cachedTokens = new Map<string, CachedToken>();
+const pendingTokens = new Map<string, Promise<CachedToken>>();
 
 function getConfig() {
-  const shop = process.env.SHOPIFY_SHOP;
   const clientId = process.env.SHOPIFY_CLIENT_ID;
   const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
-  if (!shop || !clientId || !clientSecret) {
+  if (!clientId || !clientSecret) {
     throw new Error(
-      "Missing Shopify config. Set SHOPIFY_SHOP, SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in .env",
+      "Missing Shopify config. Set SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in .env",
     );
   }
 
-  return { shopDomain: `${shop}.myshopify.com`, clientId, clientSecret };
+  return { clientId, clientSecret };
 }
 
-async function requestAccessToken(): Promise<CachedToken> {
-  const { shopDomain, clientId, clientSecret } = getConfig();
+async function requestAccessToken(shopDomain: string): Promise<CachedToken> {
+  const { clientId, clientSecret } = getConfig();
 
   const res = await fetch(`https://${shopDomain}/admin/oauth/access_token`, {
     method: "POST",
@@ -60,18 +63,28 @@ async function requestAccessToken(): Promise<CachedToken> {
   };
 }
 
-/** Returns a valid access token, reusing the cached one until shortly before it expires. */
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt) {
-    return cachedToken.value;
+/**
+ * Returns a valid access token for the store, reusing the cached one until shortly
+ * before it expires. Throws if the app has no access to the store.
+ */
+export async function getAccessToken(shopDomain: string): Promise<string> {
+  const cached = cachedTokens.get(shopDomain);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.value;
   }
 
   // Share one in-flight request if several calls need a new token at once.
-  pendingToken ??= requestAccessToken().finally(() => {
-    pendingToken = null;
-  });
-  cachedToken = await pendingToken;
-  return cachedToken.value;
+  let pending = pendingTokens.get(shopDomain);
+  if (!pending) {
+    pending = requestAccessToken(shopDomain).finally(() => {
+      pendingTokens.delete(shopDomain);
+    });
+    pendingTokens.set(shopDomain, pending);
+  }
+
+  const token = await pending;
+  cachedTokens.set(shopDomain, token);
+  return token.value;
 }
 
 type GraphQLResponse<T> = {
@@ -84,10 +97,10 @@ type GraphQLResponse<T> = {
  * Throws if the request fails or Shopify returns GraphQL errors.
  */
 export async function shopifyAdminFetch<T>(
+  shopDomain: string,
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const { shopDomain } = getConfig();
   const url = `https://${shopDomain}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
   const send = async () =>
@@ -95,7 +108,7 @@ export async function shopifyAdminFetch<T>(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Access-Token": await getAccessToken(),
+        "X-Shopify-Access-Token": await getAccessToken(shopDomain),
       },
       body: JSON.stringify({ query, variables }),
       cache: "no-store",
@@ -105,7 +118,7 @@ export async function shopifyAdminFetch<T>(
 
   // Token revoked or expired early (e.g. app reinstalled): get a new one and retry once.
   if (res.status === 401) {
-    cachedToken = null;
+    cachedTokens.delete(shopDomain);
     res = await send();
   }
 

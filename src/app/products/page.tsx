@@ -1,6 +1,12 @@
+/** 
+ * Products page: lists the products and images from the Shopify store connected to the active org. 
+ */
+
 import Image from "next/image";
 import { Suspense } from "react";
+import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { sql } from "@/lib/db";
 import { getProducts } from "@/lib/shopify/products";
 
 export const metadata = {
@@ -22,7 +28,28 @@ async function ProductList() {
   // Only signed-in users may see store data.
   await auth.protect();
 
-  const products = await getProducts();
+  // Each Clerk organization only sees its own store.
+  const { orgId } = await auth();
+  if (!orgId) {
+    return <p className="text-zinc-500">Vælg en organisation først.</p>;
+  }
+
+  const [store] = await sql<{ shopify_domain: string }[]>`
+    SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+  `;
+  if (!store) {
+    return (
+      <p className="text-zinc-500">
+        Ingen butik forbundet.{" "}
+        <Link href="/connect-store" className="underline">
+          Forbind en butik
+        </Link>
+        .
+      </p>
+    );
+  }
+
+  const products = await getProducts(store.shopify_domain);
 
   if (products.length === 0) {
     return <p className="text-zinc-500">No products found in the store.</p>;
