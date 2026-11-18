@@ -1,11 +1,19 @@
 ---
 name: project-conventions
-description: Kodekonventioner for dette repo (fx fil-header-kommentarer). Use when writing, creating or editing code files in src/ in this repo.
+description: Kodekonventioner for dette repo (sprog i appen og koden, fil-header-kommentarer). Use when writing, creating or editing code files in src/ or supabase/migrations/ in this repo.
 ---
 
 # Projektkonventioner
 
 Gælder for både Claude Code og Cursor. Cursor håndhæver de samme regler automatisk via `.cursor/rules/project-conventions.mdc`. Ændrer du en regel her, så ret den også dér.
+
+## Sprog: engelsk
+
+All app text and code are in English: UI text, error messages, page titles, placeholders, code comments, names in code, and comments in SQL migrations.
+
+- Gælder `src/`, `supabase/migrations/` og kommentarer i `.env`-filer.
+- Rapporten, "Overvejelser og valg", Jira-tickets og mødenoter skrives stadig på dansk.
+- Apostroffer i JSX skrives som `&apos;` (ESLint-reglen `react/no-unescaped-entities`).
 
 ## Fil-header-kommentar
 
@@ -21,7 +29,7 @@ Eksempel:
 
 ```ts
 'use server';
-/** Server actions til at forbinde en Shopify-butik og gemme dens access token. */
+/** Server actions for connecting a Shopify store and saving its credentials. */
 
 import { auth } from '@clerk/nextjs/server';
 ```

@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
+import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProducts } from "@/lib/shopify/products";
 
 export const metadata = {
@@ -31,7 +32,7 @@ async function ProductList() {
   // Each Clerk organization only sees its own store.
   const { orgId } = await auth();
   if (!orgId) {
-    return <p className="text-zinc-500">Vælg en organisation først.</p>;
+    return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
   const [store] = await sql<{ shopify_domain: string }[]>`
@@ -40,16 +41,30 @@ async function ProductList() {
   if (!store) {
     return (
       <p className="text-zinc-500">
-        Ingen butik forbundet.{" "}
+        No store connected.{" "}
         <Link href="/connect-store" className="underline">
-          Forbind en butik
+          Connect a store
         </Link>
         .
       </p>
     );
   }
 
-  const products = await getProducts(store.shopify_domain);
+  let products: Awaited<ReturnType<typeof getProducts>>;
+  try {
+    products = await getProducts(store.shopify_domain);
+  } catch (e) {
+    if (!(e instanceof ShopifyAuthError)) throw e;
+    return (
+      <p className="text-zinc-500">
+        Shopify no longer accepts the connection to {store.shopify_domain}. The app may have been uninstalled.{" "}
+        <Link href="/connect-store?reconnect=1" className="underline">
+          Reconnect the store
+        </Link>
+        .
+      </p>
+    );
+  }
 
   if (products.length === 0) {
     return <p className="text-zinc-500">No products found in the store.</p>;
