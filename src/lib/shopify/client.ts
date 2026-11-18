@@ -61,17 +61,29 @@ export async function shopifyAdminFetch<T>(
 ): Promise<T> {
   const url = `https://${shopDomain}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Access-Token": await getAccessToken(shopDomain),
-    },
-    body: JSON.stringify({ query, variables }),
-    cache: "no-store",
-  });
+  const send = (token: string) =>
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": token,
+      },
+      body: JSON.stringify({ query, variables }),
+      cache: "no-store",
+    });
 
-  // Token revoked (e.g. app uninstalled). Forget it, so a reconnected store is read fresh from the DB.
+  const token = await getAccessToken(shopDomain);
+  let res = await send(token);
+
+  if (res.status === 401) {
+    // The cache is per server instance. If the store was reconnected on another instance,
+    // the database already has a new token: read it and retry once.
+    forgetAccessToken(shopDomain);
+    const fresh = await getAccessToken(shopDomain);
+    if (fresh !== token) res = await send(fresh);
+  }
+
+  // Still rejected: the token in the database is revoked too (e.g. app uninstalled).
   if (res.status === 401) {
     forgetAccessToken(shopDomain);
     throw new ShopifyAuthError();

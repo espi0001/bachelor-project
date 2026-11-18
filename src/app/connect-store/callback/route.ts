@@ -17,7 +17,8 @@ export async function GET(request: Request) {
   const pending = await takePendingConnection();
   const result = pending ? await handleCallback(new URL(request.url).searchParams, pending) : 'expired';
   // Keep reconnect=1 on errors, so an org with a store stays on /connect-store instead of being sent to /products.
-  const reconnect = pending?.reconnect ? '&reconnect=1' : '';
+  // Also for 'expired': the cookie is gone, so we cannot tell. The page ignores the flag for orgs without a store.
+  const reconnect = pending?.reconnect || result === 'expired' ? '&reconnect=1' : '';
   // Outside try/catch: redirect() works by throwing.
   redirect(result === 'ok' ? '/products' : `/connect-store?error=${result}${reconnect}`);
 }
