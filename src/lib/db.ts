@@ -6,7 +6,7 @@ import 'server-only';
 import postgres from 'postgres';
 
 const url = process.env.DATABASE_URL;
-if (!url) throw new Error('DATABASE_URL mangler');
+if (!url) throw new Error('Missing DATABASE_URL');
 
-// prepare: false er nødvendigt med Supabases transaction pooler
+// prepare: false is required with Supabase's transaction pooler.
 export const sql = postgres(url, { prepare: false });

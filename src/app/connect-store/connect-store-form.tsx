@@ -1,21 +1,58 @@
 'use client';
-/** 
- * Form where the user enters their Shopify domain and connects the store. 
+/**
+ * Credentials step of the connect-store wizard: the user enters connection name, shop domain, Client ID and Client secret, then approves the app on Shopify.
  */
 
 import { useActionState } from 'react';
-import { connectStore } from './actions';
+import { connectStore, type ConnectStoreState } from './actions';
 
-export function ConnectStoreForm() {
-  const [state, formAction, pending] = useActionState(connectStore, {});
+const inputClass = 'w-full rounded border border-black/15 px-3 py-2 dark:border-white/20';
+
+export function ConnectStoreForm({ onBack, initialError }: { onBack: () => void; initialError?: string }) {
+  const [state, formAction, pending] = useActionState<ConnectStoreState, FormData>(connectStore, { error: initialError });
+  const values = state.values;
+
   return (
-    <form action={formAction} className="flex flex-col gap-2 border p-4 rounded">
-      <label htmlFor="domain" className="font-semibold">Shopify-domæne</label>
-      
-      <input className="border p-2 rounded" id="domain" name="domain" placeholder="demo-store.myshopify.com" required />
-      
-      <button disabled={pending} className="mt-4 border p-2 rounded bg-blue-500 text-white">{pending ? 'Forbinder…' : 'Forbind butik'}</button>
-      {state.error && <p role="alert">{state.error}</p>}
+    <form action={formAction} className="flex flex-col gap-4">
+      <div>
+        <h2 className="text-lg font-semibold">Enter your app credentials</h2>
+        <p className="text-sm text-zinc-500">
+          You&apos;ll find the Client ID and Client secret under <strong>Settings</strong> in your app in the Shopify Dev Dashboard.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="name" className="font-medium">Connection name</label>
+        <input id="name" name="name" required maxLength={100} defaultValue={values?.name} placeholder="e.g. Acme - Denmark" className={inputClass} />
+        <p className="text-sm text-zinc-500">Use a name you will recognize. The store name and the market work well.</p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="domain" className="font-medium">Shop domain</label>
+        <input id="domain" name="domain" required defaultValue={values?.domain} placeholder="my-store.myshopify.com" className={inputClass} />
+        <p className="text-sm text-zinc-500">
+          The <code>.myshopify.com</code> domain, not a custom domain.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="clientId" className="font-medium">Client ID</label>
+        <input id="clientId" name="clientId" required autoComplete="off" defaultValue={values?.clientId} placeholder="From your app settings" className={inputClass} />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="clientSecret" className="font-medium">Client secret</label>
+        <input id="clientSecret" name="clientSecret" type="password" required autoComplete="off" placeholder="From your app settings" className={inputClass} />
+      </div>
+
+      {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
+
+      <div className="flex items-center gap-4">
+        <button disabled={pending} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-60">
+          {pending ? 'Connecting…' : 'Connect to Shopify'}
+        </button>
+        <button type="button" onClick={onBack} className="text-sm text-zinc-600 hover:underline">← Back</button>
+      </div>
     </form>
   );
 }

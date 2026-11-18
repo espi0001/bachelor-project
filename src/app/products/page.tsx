@@ -31,7 +31,7 @@ async function ProductList() {
   // Each Clerk organization only sees its own store.
   const { orgId } = await auth();
   if (!orgId) {
-    return <p className="text-zinc-500">Vælg en organisation først.</p>;
+    return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
   const [store] = await sql<{ shopify_domain: string }[]>`
@@ -40,9 +40,9 @@ async function ProductList() {
   if (!store) {
     return (
       <p className="text-zinc-500">
-        Ingen butik forbundet.{" "}
+        No store connected.{" "}
         <Link href="/connect-store" className="underline">
-          Forbind en butik
+          Connect a store
         </Link>
         .
       </p>
