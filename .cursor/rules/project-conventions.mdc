@@ -1,7 +1,8 @@
 ---
-description: Project conventions (file header comments). Full version in .claude/skills/project-conventions/SKILL.md
-globs: src/**/*.ts,src/**/*.tsx
+description: Project conventions (English in the app and code, file header comments). Full version in .claude/skills/project-conventions/SKILL.md
+globs: src/**/*.ts,src/**/*.tsx,supabase/migrations/*.sql
 alwaysApply: false
 ---
 
+- All app text and code are in English: UI text, error messages, page titles, placeholders, code comments and SQL migration comments. The report and Jira stay in Danish.
 - Every new or touched file in src/ starts with a 1–2 line /** */ comment saying what the file does (after 'use client' / 'use server').
