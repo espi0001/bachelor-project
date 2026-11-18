@@ -43,12 +43,22 @@ async function ConnectStoreGate({ searchParams }: Pick<PageProps<'/connect-store
     return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
-  // An organization that already has a store has nothing to do here.
-  const [store] = await sql`SELECT 1 FROM store WHERE auth_org_id = ${orgId} LIMIT 1`;
-  if (store) redirect('/products');
+  const { error, reconnect } = await searchParams;
 
-  const { error } = await searchParams;
-  const initialError = typeof error === 'string' ? CALLBACK_ERRORS[error] : undefined;
+  // An organization that already has a store only comes here to reconnect it (e.g. after the app was uninstalled).
+  const [store] = await sql<{ name: string; shopify_domain: string; shopify_client_id: string }[]>`
+    SELECT name, shopify_domain, shopify_client_id FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+  `;
+  if (store && reconnect !== '1') redirect('/products');
 
-  return <ConnectStoreWizard redirectUrls={REDIRECT_URLS} initialError={initialError} />;
+  // Object.hasOwn: only our own codes, not inherited keys such as "constructor".
+  const initialError = typeof error === 'string' && Object.hasOwn(CALLBACK_ERRORS, error) ? CALLBACK_ERRORS[error] : undefined;
+
+  return (
+    <ConnectStoreWizard
+      redirectUrls={REDIRECT_URLS}
+      initialError={initialError}
+      reconnectValues={store ? { name: store.name, domain: store.shopify_domain, clientId: store.shopify_client_id } : undefined}
+    />
+  );
 }

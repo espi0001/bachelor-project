@@ -4,18 +4,28 @@
  */
 
 import { useActionState } from 'react';
-import { connectStore, type ConnectStoreState } from './actions';
+import { connectStore, type ConnectStoreState, type ConnectStoreValues } from './actions';
 
 const inputClass = 'w-full rounded border border-black/15 px-3 py-2 dark:border-white/20';
 
-export function ConnectStoreForm({ onBack, initialError }: { onBack: () => void; initialError?: string }) {
-  const [state, formAction, pending] = useActionState<ConnectStoreState, FormData>(connectStore, { error: initialError });
+type Props = {
+  onBack: () => void;
+  initialError?: string;
+  /** Saved values of the org's store when it reconnects. The domain cannot be changed then. */
+  reconnectValues?: ConnectStoreValues;
+};
+
+export function ConnectStoreForm({ onBack, initialError, reconnectValues }: Props) {
+  const [state, formAction, pending] = useActionState<ConnectStoreState, FormData>(connectStore, {
+    error: initialError,
+    values: reconnectValues,
+  });
   const values = state.values;
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div>
-        <h2 className="text-lg font-semibold">Enter your app credentials</h2>
+        <h2 className="text-lg font-semibold">{reconnectValues ? 'Reconnect your store' : 'Enter your app credentials'}</h2>
         <p className="text-sm text-zinc-500">
           You&apos;ll find the Client ID and Client secret under <strong>Settings</strong> in your app in the Shopify Dev Dashboard.
         </p>
@@ -29,7 +39,7 @@ export function ConnectStoreForm({ onBack, initialError }: { onBack: () => void;
 
       <div className="flex flex-col gap-1">
         <label htmlFor="domain" className="font-medium">Shop domain</label>
-        <input id="domain" name="domain" required defaultValue={values?.domain} placeholder="my-store.myshopify.com" className={inputClass} />
+        <input id="domain" name="domain" required defaultValue={values?.domain} readOnly={!!reconnectValues} placeholder="my-store.myshopify.com" className={inputClass} />
         <p className="text-sm text-zinc-500">
           The <code>.myshopify.com</code> domain, not a custom domain.
         </p>

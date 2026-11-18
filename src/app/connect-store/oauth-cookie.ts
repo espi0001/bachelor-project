@@ -18,6 +18,8 @@ export type PendingConnection = {
   domain: string;
   clientId: string;
   clientSecret: string;
+  /** True when the org replaces the credentials of its existing store (e.g. after the app was uninstalled). */
+  reconnect: boolean;
 };
 
 export async function savePendingConnection(pending: PendingConnection): Promise<void> {

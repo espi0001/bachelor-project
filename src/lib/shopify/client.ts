@@ -15,6 +15,19 @@ export const SHOPIFY_API_VERSION = "2026-10";
 // Decrypted tokens kept in memory, keyed by shop domain (e.g. "mes-demo-store.myshopify.com").
 const cachedTokens = new Map<string, string>();
 
+/** Thrown when Shopify rejects the stored token (app uninstalled or token revoked). The store must be reconnected. */
+export class ShopifyAuthError extends Error {
+  constructor() {
+    super("Shopify rejected the access token. Connect the store again.");
+    this.name = "ShopifyAuthError";
+  }
+}
+
+/** Removes a cached token, so the next request reads the new one from the database (used after reconnecting). */
+export function forgetAccessToken(shopDomain: string): void {
+  cachedTokens.delete(shopDomain);
+}
+
 /** Returns the store's access token from the database. Throws if the store is not connected. */
 async function getAccessToken(shopDomain: string): Promise<string> {
   const cached = cachedTokens.get(shopDomain);
@@ -60,8 +73,8 @@ export async function shopifyAdminFetch<T>(
 
   // Token revoked (e.g. app uninstalled). Forget it, so a reconnected store is read fresh from the DB.
   if (res.status === 401) {
-    cachedTokens.delete(shopDomain);
-    throw new Error("Shopify rejected the access token. Connect the store again.");
+    forgetAccessToken(shopDomain);
+    throw new ShopifyAuthError();
   }
 
   if (!res.ok) {

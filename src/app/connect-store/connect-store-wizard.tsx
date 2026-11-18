@@ -5,6 +5,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SHOPIFY_SCOPES } from '@/lib/shopify/scopes';
+import type { ConnectStoreValues } from './actions';
 import { ConnectStoreForm } from './connect-store-form';
 
 const DEV_DASHBOARD_URL = 'https://dev.shopify.com/dashboard/';
@@ -23,10 +24,12 @@ type Props = {
   redirectUrls: string[];
   /** Error from a failed OAuth callback. Opens the guide on the credentials step. */
   initialError?: string;
+  /** The org's existing store when it reconnects. Opens the credentials step with the saved values. */
+  reconnectValues?: ConnectStoreValues;
 };
 
-export function ConnectStoreWizard({ redirectUrls, initialError }: Props) {
-  const [step, setStep] = useState(initialError ? 2 : 0);
+export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues }: Props) {
+  const [step, setStep] = useState(initialError || reconnectValues ? 2 : 0);
   const [showHelp, setShowHelp] = useState(false);
 
   const goTo = (next: number) => {
@@ -118,7 +121,7 @@ export function ConnectStoreWizard({ redirectUrls, initialError }: Props) {
           </>
         )}
 
-        {step === 2 && <ConnectStoreForm onBack={() => goTo(1)} initialError={initialError} />}
+        {step === 2 && <ConnectStoreForm onBack={() => goTo(1)} initialError={initialError} reconnectValues={reconnectValues} />}
       </section>
     </div>
   );
