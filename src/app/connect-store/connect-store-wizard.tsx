@@ -68,8 +68,9 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
                     <CopyBlock value={SCOPES} />
                   </Instruction>
                   <Instruction n={4}>
-                    Under <strong>Access → Redirect URLs</strong>, add these addresses:
-                    <CopyBlock value={redirectUrls.join('\n')} />
+                    Under <strong>Access → Redirect URLs</strong>, add these addresses (comma-separated):
+                    {/* Shopify's field takes a comma-separated list. One URL per line gives "Not a valid HTTP URL". */}
+                    <CopyBlock value={redirectUrls.join(', ')} />
                   </Instruction>
                   <Instruction n={5}>
                     Click <strong>Release</strong>, then click <strong>Release</strong> again in the window that opens.
