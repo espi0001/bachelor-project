@@ -1,5 +1,6 @@
 /**
  * OAuth callback from Shopify: verifies the response, exchanges the code for a token and saves the store for the org.
+ * Redirects to the confirmation page on success, or back to /connect-store with an error code.
  */
 
 import { auth } from '@clerk/nextjs/server';
@@ -16,11 +17,15 @@ type ErrorCode = 'expired' | 'org_changed' | 'invalid' | 'exchange' | 'scopes' |
 export async function GET(request: Request) {
   const pending = await takePendingConnection();
   const result = pending ? await handleCallback(new URL(request.url).searchParams, pending) : 'expired';
+  // Outside try/catch: redirect() works by throwing.
+  if (result === 'ok') {
+    // The confirmation page says "connected again" for a reconnect.
+    redirect(pending?.reconnect ? '/connect-store/connected?reconnect=1' : '/connect-store/connected');
+  }
   // Keep reconnect=1 on errors, so an org with a store stays on /connect-store instead of being sent to /products.
   // Also for 'expired': the cookie is gone, so we cannot tell. The page ignores the flag for orgs without a store.
   const reconnect = pending?.reconnect || result === 'expired' ? '&reconnect=1' : '';
-  // Outside try/catch: redirect() works by throwing.
-  redirect(result === 'ok' ? '/products' : `/connect-store?error=${result}${reconnect}`);
+  redirect(`/connect-store?error=${result}${reconnect}`);
 }
 
 async function handleCallback(params: URLSearchParams, pending: PendingConnection): Promise<'ok' | ErrorCode> {
