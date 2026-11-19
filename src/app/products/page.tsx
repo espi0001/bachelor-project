@@ -1,14 +1,14 @@
-/** 
- * Products page: lists the products and images from the Shopify store connected to the active org. 
+/**
+ * Products page: shows the products from the Shopify store connected to the active org as a table.
  */
 
-import Image from "next/image";
 import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProducts } from "@/lib/shopify/products";
+import { ProductRow } from "@/components/product-row";
 
 export const metadata = {
   title: "Products",
@@ -71,40 +71,29 @@ async function ProductList() {
   }
 
   return (
-    <>
-      <p className="mb-4 text-sm text-zinc-500">{products.length} products</p>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <li
-            key={product.id}
-            className="rounded-lg border border-black/10 p-4 dark:border-white/15"
-          >
-            <h2 className="font-medium">{product.title}</h2>
-            <p className="mb-3 text-xs text-zinc-500">
-              {product.status.toLowerCase()} · {product.images.length} image
-              {product.images.length === 1 ? "" : "s"}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {product.images.map((image) => (
-                <figure key={image.id} className="w-24">
-                  <Image
-                    src={image.url}
-                    alt={image.altText ?? product.title}
-                    width={96}
-                    height={96}
-                    className="h-24 w-24 rounded object-cover"
-                  />
-                  <figcaption className="mt-1 text-center text-xs text-zinc-500">
-                    {image.width && image.height
-                      ? `${image.width} × ${image.height}`
-                      : "size unknown"}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </>
+    <div className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/15">
+      <table className="w-full text-left text-sm">
+        <caption className="px-6 py-5 text-left text-lg font-semibold">
+          {products.length} product{products.length === 1 ? "" : "s"}
+        </caption>
+        <thead className="bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          <tr>
+            <th scope="col" className="px-6 py-3 font-medium">Product</th>
+            <th scope="col" className="px-6 py-3 font-medium">Images</th>
+            <th scope="col" className="px-6 py-3 font-medium">Google</th>
+            <th scope="col" className="px-6 py-3 font-medium">Meta</th>
+            <th scope="col" className="px-6 py-3 font-medium">Issue</th>
+            <th scope="col" className="px-6 py-3">
+              <span className="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <ProductRow key={product.id} product={product} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
