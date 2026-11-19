@@ -10,6 +10,7 @@ const primaryButton =
 const secondaryButton =
   "flex h-12 items-center justify-center rounded-md border border-black/15 px-8 font-medium hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/20 dark:hover:bg-zinc-900";
 
+  // TODO: Make a frontpage
 export default function Home() {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-16 sm:py-24">
