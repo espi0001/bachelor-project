@@ -26,11 +26,11 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - **Mangler beskrivelse eller acceptkriterier: stop.** Brug skillen `jira-ticket-tjek` først.
 - Er det en epic, så list under-tickets og spørg, hvilken der skal laves.
 
-### 2. Lav en branch
-```bash
-git fetch origin main
-git checkout -b <prefix>/BA-<nr>-<kort-beskrivelse> origin/main
-```
+### 2. Foreslå et branch-navn
+Brugeren laver selv branchen og står selv for commit, push og PR. Gør aldrig noget af det selv: foreslå kun navnet.
+
+Format: `<prefix>/BA-<nr>-<kort-beskrivelse>`
+
 | Type | Prefix | Eksempel |
 |---|---|---|
 | Ny funktion | `feat/` | `feat/BA-139-clerk-login-flow` |
@@ -49,7 +49,7 @@ Læs de relevante filer først. Vis så:
 **Stop og vent på godkendelse.**
 
 ### 4. Kode
-- Tjek først, at du ikke står på `main` (`git branch --show-current`).
+- Tjek først, at brugeren står på den nye branch og ikke på `main` (`git branch --show-current`). Står de på `main`, så stop og bed dem lave branchen.
 - Følg den godkendte plan. Afviger du, så stop og sig det.
 - Fjerner eller omdøber du en prop, en route eller et API-felt, så spørg først.
 - Hemmeligheder hører til i `.env.local`, aldrig i koden.
