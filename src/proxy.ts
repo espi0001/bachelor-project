@@ -3,8 +3,16 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-routes";
 
-// Front page, auth pages, and the legal pages that the sign-up form links to.
-const isPublicRoute = createRouteMatcher(["/", `${SIGN_IN_URL}(.*)`, `${SIGN_UP_URL}(.*)`, "/terms", "/privacy"]);
+// Front page, auth pages, the legal pages that the sign-up form links to,
+// and the Clerk webhook (Clerk calls it without a session; the route checks the signature itself).
+const isPublicRoute = createRouteMatcher([
+  "/",
+  `${SIGN_IN_URL}(.*)`,
+  `${SIGN_UP_URL}(.*)`,
+  "/terms",
+  "/privacy",
+  "/api/webhooks/clerk",
+]);
 
 export default clerkMiddleware(
   async (auth, req) => {
