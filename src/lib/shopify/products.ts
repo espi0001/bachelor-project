@@ -23,7 +23,12 @@ export type Product = {
 };
 
 const PRODUCTS_PAGE_SIZE = 50;
-const IMAGES_PER_PRODUCT = 50;
+// Shopify allows at most 250 media per product, and 250 is also the max page size, so the
+// single-product query gets every image in one request without paginating.
+const IMAGES_PER_PRODUCT = 250;
+// The list stays lower: Shopify rejects queries whose estimated cost is over 1,000 points, and the
+// estimate multiplies products by media. The list only needs the first image and the count.
+const IMAGES_PER_PRODUCT_IN_LIST = 50;
 
 const PRODUCT_GID_PREFIX = "gid://shopify/Product/";
 
@@ -142,7 +147,7 @@ export async function getProducts(shopDomain: string): Promise<Product[]> {
     const data: ProductsQueryResult = await shopifyAdminFetch<ProductsQueryResult>(
       shopDomain,
       PRODUCTS_QUERY,
-      { first: PRODUCTS_PAGE_SIZE, after, imagesFirst: IMAGES_PER_PRODUCT },
+      { first: PRODUCTS_PAGE_SIZE, after, imagesFirst: IMAGES_PER_PRODUCT_IN_LIST },
     );
 
     products.push(...data.products.nodes.map(toProduct));

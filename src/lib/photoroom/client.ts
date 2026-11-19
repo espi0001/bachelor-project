@@ -1,5 +1,6 @@
 /**
  * Server-only client for Photoroom's Image Editing API: sends an image URL plus options and returns the edited image.
+ * Every call to Photoroom goes through this file.
  */
 
 import "server-only";
@@ -28,7 +29,7 @@ function getApiKey(): string {
 }
 
 /**
- * Sends an image to Photoroom's /v2/edit endpoint with the given options
+ * Sends an image URL to Photoroom's /v2/edit endpoint with the given options
  * (e.g. { "flatLay.mode": "ai.auto" }) and returns the edited image.
  * Throws if Photoroom returns an error or the request times out.
  */
@@ -36,17 +37,18 @@ export async function photoroomEdit(
   imageUrl: string,
   options: Record<string, string>,
 ): Promise<PhotoroomResult> {
-  // Photoroom expects multipart form data: the image plus one field per option.
-  const form = new FormData();
-  form.append("imageUrl", imageUrl);
+  // Images given by URL must use GET with everything in the query string.
+  // POST only accepts an uploaded file (imageFile); that path is added when we build upload.
+  // Docs: https://docs.photoroom.com/getting-started/api-reference-openapi
+  const url = new URL(PHOTOROOM_EDIT_URL);
+  url.searchParams.set("imageUrl", imageUrl);
   for (const [key, value] of Object.entries(options)) {
-    form.append(key, value);
+    url.searchParams.set(key, value);
   }
 
-  const res = await fetch(PHOTOROOM_EDIT_URL, {
-    method: "POST",
+  const res = await fetch(url, {
+    method: "GET",
     headers: { "x-api-key": getApiKey() },
-    body: form,
     cache: "no-store",
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });

@@ -26,21 +26,21 @@ export async function generateImage(
   productUrlId: string,
   type: ImageType,
 ): Promise<GenerateImageResult> {
-  // 1. Who is asking, and which store do they own?
-  const { orgId } = await auth();
-  if (!orgId) return { ok: false, error: "Select an organization first." };
-
-  const [store] = await sql<{ shopify_domain: string }[]>`
-    SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
-  if (!store) return { ok: false, error: "No store connected." };
-
-  // 2. Validate input from the browser.
+  // 1. Validate input from the browser.
   if (!isImageType(type)) return { ok: false, error: "Unknown image type." };
   const productId = productIdFromUrl(String(productUrlId));
   if (!productId) return { ok: false, error: "Invalid product." };
 
   try {
+    // 2. Who is asking, and which store do they own?
+    const { orgId } = await auth();
+    if (!orgId) return { ok: false, error: "Select an organization first." };
+
+    const [store] = await sql<{ shopify_domain: string }[]>`
+      SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+    `;
+    if (!store) return { ok: false, error: "No store connected." };
+
     // 3. The product must exist in this org's store. The source image URL comes from Shopify, not the browser.
     const product = await getProduct(store.shopify_domain, productId);
     if (!product) return { ok: false, error: "The product was not found in your store." };

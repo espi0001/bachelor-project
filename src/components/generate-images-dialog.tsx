@@ -50,12 +50,22 @@ export function GenerateImagesDialog({
   async function generate() {
     setStatus("generating");
     setResults([]);
-    // One call per image type, so the progress bar can count real progress.
-    for (const type of selected) {
-      const result = await generateImage(productUrlId, type);
-      setResults((current) => [...current, { ...result, type }]);
+    try {
+      // One call per image type, so the progress bar can count real progress.
+      for (const type of selected) {
+        let result: GenerateImageResult;
+        try {
+          result = await generateImage(productUrlId, type);
+        } catch {
+          // The call itself failed (e.g. lost connection or the app was redeployed). Record it and carry on.
+          result = { ok: false, error: "Could not reach the server. Try again." };
+        }
+        setResults((current) => [...current, { ...result, type }]);
+      }
+    } finally {
+      // Always finish, so Close and Escape work again. Otherwise the user is stuck in the dialog.
+      setStatus("done");
     }
-    setStatus("done");
   }
 
   return (
