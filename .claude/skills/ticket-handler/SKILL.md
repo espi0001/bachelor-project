@@ -16,6 +16,7 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - **DRY.** Sig til, hvis den samme logik står to steder.
 - **Tydelig frem for smart.** Skal man læse koden to gange, er den for smart.
 - **Hold dig til ticketen.** Alt andet er en ny ticket. Sig det.
+- **Følg `project-conventions`.** Læs skillen, før du skriver kode. Kode og kommentarer er på engelsk, selv om ticketen og planen er på dansk.
 - **Next.js 16.** API'erne er anderledes end i det meste træningsdata. Læs guiden i `node_modules/next/dist/docs/`, før du bruger en API, du er i tvivl om (se `AGENTS.md`).
 
 ## Trin
