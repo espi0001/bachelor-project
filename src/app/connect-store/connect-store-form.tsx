@@ -4,6 +4,7 @@
  */
 
 import { useActionState } from 'react';
+import { Button } from '@/components/ui/button';
 import { connectStore, type ConnectStoreState, type ConnectStoreValues } from './actions';
 
 const inputClass = 'w-full rounded border border-black/15 px-3 py-2 dark:border-white/20';
@@ -58,10 +59,10 @@ export function ConnectStoreForm({ onBack, initialError, reconnectValues }: Prop
       {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
 
       <div className="flex items-center gap-4">
-        <button disabled={pending} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-60">
+        <Button type="submit" disabled={pending}>
           {pending ? 'Connecting…' : 'Connect to Shopify'}
-        </button>
-        <button type="button" onClick={onBack} className="text-sm text-zinc-600 hover:underline">← Back</button>
+        </Button>
+        <Button variant="tertiary" leadingIcon="arrow-left" onClick={onBack}>Back</Button>
       </div>
     </form>
   );
