@@ -9,7 +9,8 @@ export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 // Tailwind v4 gives <button> the default arrow cursor (only links get the hand), so set it here.
 const BASE_CLASSES = [
   "inline-flex cursor-pointer items-center justify-center whitespace-nowrap typography-label",
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue",
+  // Brand blue has only 2.9:1 contrast on the dark page, below WCAG AA's 3:1, so dark mode uses blue-400 (7.5:1).
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:focus-visible:outline-blue-400",
   "disabled:cursor-not-allowed disabled:opacity-40",
 ].join(" ");
 
