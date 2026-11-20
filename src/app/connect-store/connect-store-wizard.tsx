@@ -4,6 +4,7 @@
  */
 
 import { useState, type ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 import { SHOPIFY_SCOPES } from '@/lib/shopify/scopes';
 import type { ConnectStoreValues } from './actions';
 import { ConnectStoreForm } from './connect-store-form';
@@ -14,10 +15,6 @@ const APP_URL = DEV_DASHBOARD_URL;
 const SCOPES = SHOPIFY_SCOPES.join(',');
 
 const STEPS = ['Custom app', 'Installation', 'Credentials'] as const;
-
-const primaryButton = 'rounded bg-blue-600 px-4 py-2 text-white';
-const secondaryButton = 'rounded border border-black/15 px-4 py-2 dark:border-white/20';
-const backButton = 'self-start text-sm text-zinc-600 hover:underline';
 
 type Props = {
   /** OAuth callback URLs the user must add under Redirect URLs in their app. */
@@ -80,12 +77,12 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
                     in the last step.
                   </Instruction>
                 </ol>
-                <button onClick={() => goTo(1)} className={`${primaryButton} self-start`}>Done, continue ›</button>
+                <Button onClick={() => goTo(1)} className="self-start">Done, continue</Button>
               </>
             ) : (
               <div className="flex gap-3">
-                <button onClick={() => setShowHelp(true)} className={secondaryButton}>I need to create one</button>
-                <button onClick={() => goTo(1)} className={primaryButton}>I have one ›</button>
+                <Button variant="secondary" onClick={() => setShowHelp(true)}>I need to create one</Button>
+                <Button onClick={() => goTo(1)}>I have one</Button>
               </div>
             )}
           </>
@@ -110,15 +107,17 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
                   <strong>Tip:</strong> You don&apos;t need to wait for the installation. You can fill in the connection details
                   now and authorize once the app is installed.
                 </p>
-                <button onClick={() => goTo(2)} className={`${primaryButton} self-start`}>Got it, continue ›</button>
+                <Button onClick={() => goTo(2)} className="self-start">Got it, continue</Button>
               </>
             ) : (
               <div className="flex gap-3">
-                <button onClick={() => setShowHelp(true)} className={secondaryButton}>How do I install it?</button>
-                <button onClick={() => goTo(2)} className={primaryButton}>It&apos;s installed ›</button>
+                <Button variant="secondary" onClick={() => setShowHelp(true)}>How do I install it?</Button>
+                <Button onClick={() => goTo(2)}>It&apos;s installed</Button>
               </div>
             )}
-            <button onClick={() => goTo(0)} className={backButton}>← Back</button>
+            <Button variant="tertiary" leadingIcon="arrow-left" onClick={() => goTo(0)} className="self-start">
+              Back
+            </Button>
           </>
         )}
 
