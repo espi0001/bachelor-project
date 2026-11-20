@@ -27,7 +27,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: `${FILLED_CLASSES} border-transparent bg-brand text-on-brand hover:bg-brand-hover`,
   secondary: `${FILLED_CLASSES} border-default bg-surface text-primary shadow-sm hover:border-zinc-300 hover:bg-zinc-50`,
   // Text only, like the Back link in Figma. `rounded-sm` keeps the focus outline from being a sharp box.
-  tertiary: "gap-1 rounded-sm text-secondary hover:text-primary",
+  tertiary:
+    "gap-1 rounded-sm text-secondary hover:text-primary dark:text-zinc-400 dark:hover:text-zinc-200",
 };
 
 /** The complete class list for an element that looks like a button. */

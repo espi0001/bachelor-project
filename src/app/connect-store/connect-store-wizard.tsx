@@ -80,7 +80,7 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
                 <Button onClick={() => goTo(1)} className="self-start">Done, continue</Button>
               </>
             ) : (
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setShowHelp(true)}>I need to create one</Button>
                 <Button onClick={() => goTo(1)}>I have one</Button>
               </div>
@@ -110,7 +110,7 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
                 <Button onClick={() => goTo(2)} className="self-start">Got it, continue</Button>
               </>
             ) : (
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setShowHelp(true)}>How do I install it?</Button>
                 <Button onClick={() => goTo(2)}>It&apos;s installed</Button>
               </div>
