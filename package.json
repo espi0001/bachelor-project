@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:all": "supabase start && next dev"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.25",
+    "@supabase/supabase-js": "^2.119.2",
     "next": "16.4.5",
     "postgres": "^4.1.1",
     "react": "19.3.0",

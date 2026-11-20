@@ -176,9 +176,9 @@ export function GenerateImagesDialog({
                 <li key={result.type}>
                   <p className="mb-2 text-sm font-medium">{IMAGE_TYPE_LABELS[result.type]}</p>
                   {result.ok ? (
-                    // unoptimized: the image is a data URL straight from the server, not a file the optimizer can fetch.
+                    // unoptimized: a signed link expires, so the image optimizer should not fetch and cache it.
                     <Image
-                      src={result.dataUrl}
+                      src={result.imageUrl}
                       alt={`${IMAGE_TYPE_LABELS[result.type]} of ${productTitle}`}
                       width={512}
                       height={512}
