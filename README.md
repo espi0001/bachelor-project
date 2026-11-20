@@ -13,6 +13,7 @@ Current skills:
 
 - `ticket-handler`: builds a BA ticket from start to finish. Run `/ticket-handler BA-123`.
 - `jira-ticket-tjek`: creates or checks Jira tickets in BA.
+- `project-conventions`: code conventions for `src/` and `supabase/migrations/` (language, file headers, structure, Clerk orgs, database, secrets, styling, accessibility). Loads by itself when the agent writes or reviews code. Cursor also gets a short version in `.cursor/rules/project-conventions.mdc`, so update both when you change a rule.
 
 ### Add a rule
 
@@ -25,6 +26,8 @@ Write it in `AGENTS.md`, below the `<!-- END:nextjs-agent-rules -->` line. `next
 3. Add `disable-model-invocation: true` if the skill should only run when someone calls it with `/<name>`.
 
 Do not copy rules or skills into `.cursor/` or `.agents/`. Copies drift apart.
+
+One exception: `project-conventions` has a short version in `.cursor/rules/project-conventions.mdc`. Its globs make Cursor apply the rules every time it works on code in `src/` or `supabase/migrations/`. The skill is the full version. When you change a rule, change both files.
 
 ## Getting Started
 

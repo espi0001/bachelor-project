@@ -16,6 +16,7 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - **DRY.** Sig til, hvis den samme logik står to steder.
 - **Tydelig frem for smart.** Skal man læse koden to gange, er den for smart.
 - **Hold dig til ticketen.** Alt andet er en ny ticket. Sig det.
+- **Følg `project-conventions`.** Læs skillen, før du skriver kode. Kode og kommentarer er på engelsk, selv om ticketen og planen er på dansk.
 - **Next.js 16.** API'erne er anderledes end i det meste træningsdata. Læs guiden i `node_modules/next/dist/docs/`, før du bruger en API, du er i tvivl om (se `AGENTS.md`).
 
 ## Trin
@@ -33,7 +34,7 @@ Format: `<prefix>/BA-<nr>-<kort-beskrivelse>`
 
 | Type | Prefix | Eksempel |
 |---|---|---|
-| Ny funktion | `feat/` | `feat/BA-139-clerk-login-flow` |
+| Ny funktion | `feature/` | `feature/BA-139-clerk-login-flow` |
 | Fejl | `fix/` | `fix/BA-140-upload-fejlbesked` |
 | Opsætning, opdateringer | `chore/` | `chore/BA-110-eslint-config` |
 
@@ -47,6 +48,8 @@ Læs de relevante filer først. Vis så:
 - **Hvad der kan gå i stykker.**
 
 **Stop og vent på godkendelse.**
+
+Når brugeren har valgt en mulighed, så tilbyd at logge valget i "Overvejelser og valg" med skillen `overvejelse-til-rapport` (muligheder, valg og begrundelse). Gælder kun reelle valg (teknologi, arkitektur, metode), ikke småting som et variabelnavn.
 
 ### 4. Kode
 - Tjek først, at brugeren står på den nye branch og ikke på `main` (`git branch --show-current`). Står de på `main`, så stop og bed dem lave branchen.
@@ -69,8 +72,37 @@ Læs de relevante filer først. Vis så:
    ```
    Fejl i filer, du har ændret, skal rettes. Fejl andre steder skal bare nævnes.
 
-### 6. Opsummering
+### 6. Gem verifikationen
+Skriv `.agent-notes/BA-<nr>.md` (mappen er gitignored, så spørg ikke om commit). Det er testdokumentation, gruppen kan bruge i rapporten eller som bilag, så skriv det, så det giver mening uden chatten:
+
+```markdown
+# Verifikation: BA-<nr> — <titel>
+Dato: <yyyy-mm-dd> · Branch: <branch>
+
+## Acceptkriterier
+| # | Acceptkriterie | Hvordan tjekket | Resultat |
+|---|---|---|---|
+| 1 | … | Browser, mobil + desktop / kun tastatur / kode | OK / Ikke OK |
+
+## Andre scenarier
+| Scenarie | Forventet | Resultat |
+|---|---|---|
+| Ingen organisation valgt | Besked "Select an organization first." | OK |
+| Tomme data / API-fejl | … | … |
+
+## Kvalitetstjek
+- `npm run lint`: OK / fejl (hvilke)
+- `npx tsc --noEmit`: OK / fejl
+- `npm run build`: OK / fejl
+
+## Åbne punkter
+- …
+```
+
+Skriv kun "OK" for det, du faktisk har tjekket. Kunne du ikke tjekke noget (fx i browseren), så skriv "Ikke tjekket" og hvorfor.
+
+### 7. Opsummering
 - Hvad er ændret, og hvorfor.
-- Tabel: acceptkriterie → hvordan det er tjekket → OK / ikke OK.
+- Tabel: acceptkriterie → hvordan det er tjekket → OK / ikke OK. Henvis til `.agent-notes/BA-<nr>.md`.
 - Åbne punkter og forslag til nye tickets.
-- Forslag til PR-titel: `BA-<nr>: <titel>`.
+- Forslag til PR-titel: `BA-<nr>: <titel>`, og at `/pr-desc` kan skrive beskrivelsen.

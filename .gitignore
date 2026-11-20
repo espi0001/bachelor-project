@@ -24,3 +24,9 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent scratch (verification tables, plans)
+/.agent-notes/
+
+# personal Claude Code settings (the shared ones are in .claude/settings.json)
+.claude/settings.local.json
