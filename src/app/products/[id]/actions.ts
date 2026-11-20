@@ -105,6 +105,6 @@ export async function generateImage(
     return { ok: true, imageUrl: url };
   } catch (e) {
     console.error(`Signing ${path} failed:`, e);
-    return { ok: false, error: "The image was saved but could not be shown. Reload the page to see it." };
+    return { ok: false, error: "The image was saved, but its preview could not be loaded." };
   }
 }
