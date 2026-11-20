@@ -1,6 +1,7 @@
 'use client';
 /** Site header: the Instant Image logo and the auth actions. Hidden on the sign-in and sign-up pages, where Clerk's form stands alone. */
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-routes";
@@ -17,7 +18,7 @@ export function SiteHeader() {
           href="/"
           className="flex items-center gap-2 text-lg font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
         >
-          <span aria-hidden="true" className="h-6 w-6 rounded-full border-4 border-indigo-600" />
+          <Image src="/logo.svg" alt="" width={28} height={28} priority />
           Instant Image
         </Link>
         <HeaderActions />
