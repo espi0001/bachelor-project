@@ -120,9 +120,11 @@ How to act on it:
 Clerk handles login. A Clerk organization is a customer. All data belongs to one organization.
 
 - All pages are protected in `src/proxy.ts`. A new public page or webhook must be added to `isPublicRoute` with a comment saying why.
-- Always get `orgId` on the server with `await auth()`. Never take it from the browser, a URL or a form.
+- `orgId` comes from one of two trusted sources, never from the browser, a URL or a form:
+    - **Requests from a signed-in user** (pages, server actions): `await auth()` on the server.
+    - **Webhooks** (no user session): the event payload, but only after the signature is verified. See `event.data.id` in `src/app/api/webhooks/clerk/route.ts`. Do not add `auth()` to a webhook; it has no session and would fail.
 - Every query on a table with customer data must have `WHERE auth_org_id = ${orgId}`. It is the only separation between customers, so if you forget it, one customer can see another customer's data.
-- If `orgId` is missing, show a message ("Select an organization first."). Do not throw an error.
+- If `orgId` is missing in a page or server action, show a message ("Select an organization first."). Do not throw an error. A webhook returns a `400` instead.
 
 ## Database (Supabase)
 

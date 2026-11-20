@@ -11,7 +11,7 @@ alwaysApply: false
 - When writing, reviewing or suggesting code, recommend a component when the same markup and classes appear 2+ times, or a block has its own state and makes its parent hard to read. Not for one-off markup. In code for the current task, make it. In existing code outside the task, only name the files and suggest a ticket.
 - TypeScript strict: no any (use unknown + a type guard), type not interface, no enum (as const arrays).
 - Server Components by default. With cacheComponents, per-request data and usePathname must render inside <Suspense>. Never fetch data in useEffect. Never use <img>.
-- Always get orgId on the server with await auth(). Every query on customer data has WHERE auth_org_id = ${orgId}.
+- Get orgId on the server with await auth() in pages and server actions, or from the event payload in a webhook after its signature is verified (webhooks have no session, so no auth() there). Never from the browser, a URL or a form. Every query on customer data has WHERE auth_org_id = ${orgId}.
 - All SQL goes through sql from @/lib/db as a tagged template. Never build SQL from strings. Server-side modules with secrets import 'server-only'.
 - Database changes only as a new file in supabase/migrations/. Never edit an applied migration. Never run supabase db push without asking.
 - Server actions re-check input and auth(), and return errors as data ({ ok: false, error }). Details go to console.error only. Webhooks verify the signature first.

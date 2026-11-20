@@ -28,8 +28,10 @@ Cursor gets a short version of `project-conventions` via `.cursor/rules/project-
 These are the rules that are expensive to get wrong. The full reasons are in `project-conventions`.
 
 - **Customer data is separated only by `auth_org_id`.** Every query on customer data has
-  `WHERE auth_org_id = ${orgId}`, and `orgId` comes only from `await auth()` on the server, never
-  from the browser, a URL or a form. Forgetting it lets one customer see another customer's data.
+  `WHERE auth_org_id = ${orgId}`. `orgId` comes from `await auth()` on the server in pages and
+  server actions, or from a webhook's payload after its signature is verified (webhooks have no
+  session). Never from the browser, a URL or a form. Forgetting the filter lets one customer see
+  another customer's data.
 - **`cacheComponents` is on.** Per-request data (Clerk, database, Shopify) and hooks like
   `usePathname` must render inside `<Suspense>`. `npm run dev` does not catch a missing boundary;
   `npm run build` does, so run it before saying you are done.
