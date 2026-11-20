@@ -1,0 +1,12 @@
+/* Shadow tokens
+   Source: Figma "Bachelor-projekt" (Op1pBDGz23Q7CpGmMToXme), Style guide frame 148:571.
+   Radius needs no tokens: Tailwind's rounded-sm/md/lg/xl/2xl/full are already
+   4/6/8/12/16/9999px, the same as Figma's radius/*. Use rounded-lg for cards, buttons
+   and inputs, rounded-full for pills and avatars. */
+@theme {
+    /* Figma Shadow/sm — cards and secondary buttons. Overrides Tailwind's shadow-sm so the
+       class has the same name as the Figma style. */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    /* Figma Shadow/modal — dialogs and menus */
+    --shadow-modal: 0 12px 48px 0 rgb(0 0 0 / 0.28);
+}

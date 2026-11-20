@@ -159,12 +159,16 @@ Supabase is used **only** as a Postgres database and for migrations. We do not u
 
 ## Styling (Tailwind v4)
 
-Tailwind v4 has no `tailwind.config`. The configuration is in `src/app/globals.css`.
+Tailwind v4 has no `tailwind.config`. `src/app/globals.css` imports the design tokens from `src/styles/`:
+
+- `theme-*.css`: tokens from the Figma style guide (colours, font, shadows) in `@theme`. One file per kind of token.
+- `utilities-*.css`: `@utility` classes built on the tokens, e.g. `typography-heading-section`.
 
 - Use utility classes. New CSS only for things the classes cannot do.
 - Mobile first: classes without a prefix are for small screens. Add `sm:`/`md:`/`lg:` upward.
 - Support dark mode with `dark:` on colors, as the code does today.
-- Colors: there are no design tokens yet. If a color repeats (e.g. Clerk blue `#2b47f4`), put it in `@theme` in `globals.css` as a token instead of writing the hex value in several places.
+- Use the semantic tokens from the style guide: `text-primary`/`text-secondary`/`text-muted`, `bg-page`/`bg-surface`/`bg-subtle`/`bg-brand`, `border-default`, status pairs like `bg-success text-success`. Text styles: `typography-*`. Radius: Tailwind's defaults already match Figma (`rounded-lg` for cards, buttons and inputs).
+- A new colour or token goes in the matching `src/styles/theme-*.css` file, never as a hex value in a component.
 
 ## Accessibility (WCAG AA)
 
