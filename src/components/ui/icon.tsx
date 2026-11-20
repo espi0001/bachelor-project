@@ -500,8 +500,10 @@ const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-// sm is the size in buttons and links (the Back link in Figma), md is the size the set is drawn at.
+// xs is the size in sidebar nav items, sm the size in buttons and links (the Back link in Figma),
+// md the size the set is drawn at.
 const ICON_SIZES = {
+  xs: "size-4",
   sm: "size-4.5",
   md: "size-6",
 } as const;
