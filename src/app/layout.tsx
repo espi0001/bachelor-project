@@ -3,20 +3,16 @@
  */
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Suspense } from "react";
 import { SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-routes";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// The style guide font. Self-hosted by next/font, so it looks the same on every OS.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -30,10 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {/* Every sign-in and sign-up goes through /dashboard, which sends the user on to /products or /connect-store. Logout returns to the front page. */}
         <ClerkProvider
@@ -42,8 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           signInFallbackRedirectUrl="/dashboard"
           signUpFallbackRedirectUrl="/dashboard"
           afterSignOutUrl="/"
-          // Blue buttons and links in Clerk's forms (sign-in, sign-up, organization).
-          appearance={{ variables: { colorPrimary: "#2b47f4" } }}
+          // Brand blue (--color-instant-blue) on buttons and links in Clerk's forms. Clerk needs the hex value.
+          appearance={{ variables: { colorPrimary: "#0f3bfe" } }}
         >
           {/* SiteHeader reads the URL (usePathname), so it must render inside Suspense (cacheComponents). */}
           <Suspense>

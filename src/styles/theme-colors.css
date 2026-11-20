@@ -1,0 +1,39 @@
+/* Colour tokens
+   Source: Figma "Bachelor-projekt" (Op1pBDGz23Q7CpGmMToXme), Style guide frame 148:571.
+   Primitives are Tailwind's own palette (zinc, green, red, amber, blue), so they are not
+   redefined here. Only the brand colour and the semantic names are added.
+
+   Semantic tokens use Tailwind's per-utility namespaces, so the class reads like the Figma
+   variable: `--text-color-primary` gives `text-primary`, `--background-color-page` gives
+   `bg-page`, `--border-color-default` gives `border-default`. */
+@theme {
+    /* Brand — Figma instant/blue */
+    --color-instant-blue: #0f3bfe;
+
+    /* Text */
+    --text-color-primary: var(--color-zinc-800);
+    --text-color-secondary: var(--color-zinc-500);
+    --text-color-muted: var(--color-zinc-400);
+    --text-color-brand: var(--color-instant-blue);
+    --text-color-on-brand: var(--color-white);
+
+    /* Backgrounds */
+    --background-color-page: var(--color-zinc-50);
+    --background-color-surface: var(--color-white);
+    --background-color-subtle: color-mix(in oklab, var(--color-zinc-950) 5%, transparent);
+    --background-color-brand: var(--color-instant-blue);
+
+    /* Borders */
+    --border-color-default: color-mix(in oklab, var(--color-zinc-950) 10%, transparent);
+
+    /* Status badges — background and text are always used as a pair,
+       e.g. `bg-success text-success` */
+    --background-color-success: var(--color-green-100);
+    --text-color-success: var(--color-green-800);
+    --background-color-error: var(--color-red-100);
+    --text-color-error: var(--color-red-700);
+    --background-color-warning: var(--color-amber-100);
+    --text-color-warning: var(--color-amber-800);
+    --background-color-info: var(--color-blue-200);
+    --text-color-info: var(--color-blue-800);
+}

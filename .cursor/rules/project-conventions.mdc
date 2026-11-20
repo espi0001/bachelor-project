@@ -17,6 +17,6 @@ alwaysApply: false
 - Server actions re-check input and auth(), and return errors as data ({ ok: false, error }). Details go to console.error only. Webhooks verify the signature first.
 - Secrets live in .env.local and Vercel env vars. Never prefix a secret with NEXT_PUBLIC_. Encrypt stored Shopify secrets with encrypt() from @/lib/crypto.
 - Calls to Shopify and Photoroom go through their client in src/lib/<service>/.
-- Tailwind utilities, mobile first, dark: variants. Put a repeated colour in @theme in globals.css instead of repeating the hex value.
+- Tailwind utilities, mobile first, dark: variants. Use the style guide tokens from src/styles/ (text-primary, bg-surface, border-default, typography-*). A new token goes in src/styles/theme-*.css, never a hex value in a component.
 - WCAG AA: semantic HTML, visible focus-visible/hover/disabled states, alt on every image, explain disabled buttons, aria-live for changing status.
 - Run npm run lint and npm run build before saying you are done. No test runner.

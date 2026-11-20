@@ -1,0 +1,14 @@
+/* Font tokens
+   Source: Figma "Bachelor-projekt" (Op1pBDGz23Q7CpGmMToXme), Style guide frame 148:571.
+   Inter, loaded with next/font in app/layout.tsx. A web font instead of the system font,
+   so text looks the same on Mac, Windows and Android (the system font is SF Pro on a Mac
+   but Segoe UI on Windows, which has no Medium weight).
+
+   Font sizes and line heights are Tailwind's defaults, which already match Figma
+   (text-xs 12/16, text-sm 14/20, text-base 16/24, text-lg 18/28, text-2xl 24/32).
+   The type roles are composed in utilities-typography.css. */
+
+/* `inline` because --font-inter is set by next/font on <html>, not in this file. */
+@theme inline {
+    --font-sans: var(--font-inter), system-ui, sans-serif;
+}

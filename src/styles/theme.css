@@ -1,0 +1,4 @@
+/* Design tokens from the Figma style guide. Each file adds to Tailwind's @theme. */
+@import "./theme-colors.css";
+@import "./theme-typography.css";
+@import "./theme-shadow.css";
