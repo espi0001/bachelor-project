@@ -6,8 +6,9 @@
 export const BUTTON_VARIANTS = ["primary", "secondary", "tertiary"] as const;
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 
+// Tailwind v4 gives <button> the default arrow cursor (only links get the hand), so set it here.
 const BASE_CLASSES = [
-  "inline-flex items-center justify-center whitespace-nowrap typography-label",
+  "inline-flex cursor-pointer items-center justify-center whitespace-nowrap typography-label",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue",
   "disabled:cursor-not-allowed disabled:opacity-40",
 ].join(" ");
@@ -21,14 +22,12 @@ const FILLED_PADDING = {
   iconOnly: "p-2.5",
 } as const;
 
-// Figma has no hover state, so hover only changes the colour a little.
-// `not-disabled:` keeps a disabled button from reacting to hover. Not `enabled:`, because
-// `:enabled` never matches an <a>, so `ButtonLink` would get no hover at all.
+// Figma has no hover state. Primary goes darker, secondary gets a grey fill and a darker border.
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: `${FILLED_CLASSES} border-transparent bg-brand text-on-brand not-disabled:hover:bg-brand/90`,
-  secondary: `${FILLED_CLASSES} border-default bg-surface text-primary shadow-sm not-disabled:hover:bg-subtle`,
+  primary: `${FILLED_CLASSES} border-transparent bg-brand text-on-brand hover:bg-brand-hover`,
+  secondary: `${FILLED_CLASSES} border-default bg-surface text-primary shadow-sm hover:border-zinc-300 hover:bg-zinc-50`,
   // Text only, like the Back link in Figma. `rounded-sm` keeps the focus outline from being a sharp box.
-  tertiary: "gap-1 rounded-sm text-secondary not-disabled:hover:text-primary",
+  tertiary: "gap-1 rounded-sm text-secondary hover:text-primary",
 };
 
 /** The complete class list for an element that looks like a button. */

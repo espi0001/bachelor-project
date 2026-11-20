@@ -22,6 +22,8 @@
     --background-color-surface: var(--color-white);
     --background-color-subtle: color-mix(in oklab, var(--color-zinc-950) 5%, transparent);
     --background-color-brand: var(--color-instant-blue);
+    /* Not in Figma: hover on brand buttons. 15% black, so the change is easy to see. */
+    --background-color-brand-hover: color-mix(in oklab, var(--color-instant-blue) 85%, black);
 
     /* Borders */
     --border-color-default: color-mix(in oklab, var(--color-zinc-950) 10%, transparent);
