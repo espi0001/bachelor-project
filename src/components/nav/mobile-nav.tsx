@@ -129,8 +129,7 @@ export function MobileNav({ pathname }: { pathname: string }) {
         id="mobile-menu"
         className={`fixed inset-y-0 right-0 z-30 flex w-full flex-col gap-1 overflow-y-auto bg-surface p-4 shadow-modal transition-[translate,visibility] duration-800 ease-[cubic-bezier(0.76,0,0.24,1)] motion-reduce:transition-none sm:max-w-sm dark:bg-zinc-950 ${PANEL_STATE_CLASSES[isMenuOpen ? "open" : "closed"]}`}
       >
-        <div className="flex items-center justify-between pb-4 pt-1">
-          {/* <Brand variant="mobile" /> */}
+        <div className="mb-2 flex items-center justify-end border-b border-default pb-4 pt-1 dark:border-white/15">
           <button ref={closeButtonRef} type="button" aria-label="Close menu" onClick={closeMenu} className={ICON_BUTTON_CLASS}>
             <Icon name="close" />
           </button>
