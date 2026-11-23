@@ -2,9 +2,9 @@
    `typography-heading-section` instead of size + line height + weight.
    Source: Figma "Bachelor-projekt" (Op1pBDGz23Q7CpGmMToXme), Style guide frame 148:571. */
 
-/* Heading/Page title — 24 / 32 Medium */
+/* Heading/Page title — 28 / 36 Medium */
 @utility typography-heading-page {
-    @apply text-2xl font-medium;
+    @apply text-2xl2 font-medium;
 }
 
 /* Heading/Section — 18 / 28 Semibold */
