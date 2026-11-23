@@ -14,11 +14,11 @@ export const metadata = {
 
 export default function StoreConnectedPage({ searchParams }: PageProps<'/connect-store/connected'>) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="">
       <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
         <StoreConnected searchParams={searchParams} />
       </Suspense>
-    </main>
+    </div>
   );
 }
 

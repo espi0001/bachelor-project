@@ -5,7 +5,7 @@
    but Segoe UI on Windows, which has no Medium weight).
 
    Font sizes and line heights are Tailwind's defaults, which already match Figma
-   (text-xs 12/16, text-sm 14/20, text-base 16/24, text-lg 18/28, text-2xl 24/32).
+   (text-base 16/24, text-lg 18/28, text-2xl 24/32).
    The type roles are composed in utilities-typography.css. */
 
 /* `inline` because --font-inter is set by next/font on <html>, not in this file. */

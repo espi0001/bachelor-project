@@ -18,14 +18,14 @@ export const metadata = {
 
 export default function ProductPage({ params }: PageProps<"/products/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
+    <div className="">
       {/* With cacheComponents, params are request data and must be read inside Suspense. */}
       <Suspense fallback={<p className="text-zinc-500">Loading product…</p>}>
         {params.then(({ id }) => (
           <ProductDetail urlId={id} />
         ))}
       </Suspense>
-    </main>
+    </div>
   );
 }
 

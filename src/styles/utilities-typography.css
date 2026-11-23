@@ -17,23 +17,22 @@
     @apply text-base font-normal;
 }
 
-/* Body/Small — 14 / 20 Regular */
+/* Body/Small — 16 / 24 Regular */
 @utility typography-body-sm {
-    @apply text-sm font-normal;
+    @apply text-base font-normal;
 }
 
-/* Label/Default — 14 / 20 Medium */
+/* Label/Default — 16 / 24 Medium */
 @utility typography-label {
-    @apply text-sm font-medium;
+    @apply text-base font-medium;
 }
 
-/* Label/Small — 13 / 18 Medium. Tailwind has no 13px step and this is the only role
-   that uses it, so the value stays here instead of becoming a token. */
+/* Label/Small — 16 / 24 Medium */
 @utility typography-label-sm {
-    @apply text-[0.8125rem]/[1.125rem] font-medium;
+    @apply text-base font-medium;
 }
 
-/* Caption — 12 / 16 Regular */
+/* Caption — 16 / 24 Regular */
 @utility typography-caption {
-    @apply text-xs font-normal;
+    @apply text-base font-normal;
 }

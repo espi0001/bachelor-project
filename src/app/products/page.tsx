@@ -16,12 +16,12 @@ export const metadata = {
 
 export default function ProductsPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <div>
       <h1 className="mb-6 text-2xl font-semibold">Products from Shopify</h1>
       <Suspense fallback={<p className="text-zinc-500">Loading products…</p>}>
         <ProductList />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
