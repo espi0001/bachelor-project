@@ -17,7 +17,15 @@ import {
 } from "@/lib/supabase/storage";
 
 export type GenerateImageResult =
-  | { ok: true; imageUrl: string }
+  | {
+      ok: true;
+      /** The new generated_image row, so the dialog can approve or reject it. */
+      imageId: string;
+      /** Signed link to the generated file. */
+      imageUrl: string;
+      /** The Shopify image it was generated from, shown next to it for comparison. */
+      sourceImageUrl: string;
+    }
   | { ok: false; error: string };
 
 const generators: Record<ImageType, (imageUrl: string) => ReturnType<typeof generatePackshot>> = {
@@ -47,6 +55,8 @@ export async function generateImage(
   if (!productId) return { ok: false, error: "Invalid product." };
 
   let path: string;
+  let imageId: string;
+  let sourceImageUrl: string;
   try {
     // 2. Who is asking, and which store do they own?
     const { orgId } = await auth();
@@ -63,6 +73,7 @@ export async function generateImage(
 
     const source = product.images[0];
     if (!source) return { ok: false, error: "The product has no images to generate from." };
+    sourceImageUrl = source.url;
 
     // 4. Generate.
     const result = await generators[type](source.url);
@@ -78,12 +89,14 @@ export async function generateImage(
 
     // 6. Save the row. If that fails, delete the file again so no file is left without a row.
     try {
-      await sql`
+      const [row] = await sql<{ id: string }[]>`
         INSERT INTO generated_image
           (store_id, shopify_product_id, type, source_image_id, source_image_url, storage_path)
         VALUES
           (${store.id}, ${product.id}, ${type}, ${source.id}, ${source.url}, ${path})
+        RETURNING id
       `;
+      imageId = row.id;
     } catch (insertError) {
       try {
         await deleteGeneratedImage(path);
@@ -102,7 +115,7 @@ export async function generateImage(
   try {
     const url = (await createSignedImageUrls([path])).get(path);
     if (!url) throw new Error(`No signed link returned for ${path}`);
-    return { ok: true, imageUrl: url };
+    return { ok: true, imageId, imageUrl: url, sourceImageUrl };
   } catch (e) {
     console.error(`Signing ${path} failed:`, e);
     return { ok: false, error: "The image was saved, but its preview could not be loaded." };

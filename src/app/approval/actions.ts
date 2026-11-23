@@ -13,7 +13,14 @@ import { addProductImage } from "@/lib/shopify/media";
 import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
 
-export type ApprovalResult = { ok: true } | { ok: false; error: string };
+export type ApprovalResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error: string;
+      /** True if the image was approved but is not in Shopify, so the card should offer Retry. */
+      uploadFailed?: boolean;
+    };
 
 /** What the upload needs to know about an image and its store. */
 type ImageToUpload = {
@@ -119,7 +126,7 @@ async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<A
   try {
     const titles = await getProductTitles(image.shopify_domain, [image.shopify_product_id]);
     const title = titles.get(image.shopify_product_id);
-    if (!title) return { ok: false, error: "Approved, but the product no longer exists in Shopify." };
+    if (!title) return { ok: false, error: "Approved, but the product no longer exists in Shopify.", uploadFailed: true };
 
     // Shopify downloads the file itself from this link while addProductImage waits. It is valid for an hour.
     const url = (await createSignedImageUrls([image.storage_path])).get(image.storage_path);
@@ -136,9 +143,13 @@ async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<A
   } catch (e) {
     console.error(`Uploading image ${imageId} to Shopify failed:`, e);
     if (e instanceof ShopifyAuthError) {
-      return { ok: false, error: "Approved, but Shopify no longer accepts the connection. Reconnect the store." };
+      return {
+        ok: false,
+        error: "Approved, but Shopify no longer accepts the connection. Reconnect the store.",
+        uploadFailed: true,
+      };
     }
-    return { ok: false, error: "Approved, but the upload to Shopify failed." };
+    return { ok: false, error: "Approved, but the upload to Shopify failed.", uploadFailed: true };
   }
 
   // 2. Record the upload.
@@ -151,7 +162,12 @@ async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<A
   } catch (e) {
     // The image is in Shopify, but the database does not know. A retry would add it twice.
     console.error(`Image ${imageId} is in Shopify as ${mediaId}, but saving that failed:`, e);
-    return { ok: false, error: "The image was uploaded, but saving that failed. Check Shopify before retrying." };
+    // Still reported as a failed upload: the row has no media ID, so /approval shows it with Retry too.
+    return {
+      ok: false,
+      error: "The image was uploaded, but saving that failed. Check Shopify before retrying.",
+      uploadFailed: true,
+    };
   }
 
   // The callers refresh the page, whatever the result.

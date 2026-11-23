@@ -4,7 +4,7 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import type { ButtonVariant } from "@/components/ui/button-styles";
-import type { ApprovalResult } from "./actions";
+import type { ApprovalResult } from "@/app/approval/actions";
 
 type ActionButtonProps = {
   /** A server action with the image ID already bound, e.g. `approveImage.bind(null, imageId)`. */
@@ -13,9 +13,11 @@ type ActionButtonProps = {
   label: string;
   /** Shown while the action runs, e.g. "Rejecting…". */
   pendingLabel: string;
+  /** Called with the result, for callers that keep their own state (the generate dialog). */
+  onResult?: (result: ApprovalResult) => void;
 };
 
-export function ActionButton({ action, variant, label, pendingLabel }: ActionButtonProps) {
+export function ActionButton({ action, variant, label, pendingLabel, onResult }: ActionButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +27,7 @@ export function ActionButton({ action, variant, label, pendingLabel }: ActionBut
       try {
         const result = await action();
         if (!result.ok) setError(result.error);
+        onResult?.(result);
       } catch {
         // The call itself failed (e.g. lost connection or the app was redeployed).
         setError("Could not reach the server. Try again.");

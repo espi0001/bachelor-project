@@ -11,7 +11,7 @@ import { IMAGE_TYPE_LABELS, isImageType } from "@/lib/image-types";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
-import { ApprovalCard } from "./approval-card";
+import { ApprovalCard } from "@/components/approval-card";
 
 export const metadata = {
   title: "Approval",
