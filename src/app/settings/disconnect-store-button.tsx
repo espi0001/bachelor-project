@@ -5,9 +5,14 @@ import { useActionState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { disconnectStore, type DisconnectStoreState } from "./actions";
 
-export function DisconnectStoreButton({ shopDomain }: { shopDomain: string }) {
+type DisconnectStoreButtonProps = {
+  storeId: string;
+  shopDomain: string;
+};
+
+export function DisconnectStoreButton({ storeId, shopDomain }: DisconnectStoreButtonProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [state, formAction, isPending] = useActionState<DisconnectStoreState>(disconnectStore, {});
+  const [state, formAction, isPending] = useActionState<DisconnectStoreState, FormData>(disconnectStore, {});
 
   return (
     <>
@@ -40,6 +45,8 @@ export function DisconnectStoreButton({ shopDomain }: { shopDomain: string }) {
         ) : null}
 
         <form action={formAction} className="mt-6 flex justify-end gap-3">
+          {/* Tells the action which store was confirmed, so it never deletes a store connected since. */}
+          <input type="hidden" name="storeId" value={storeId} />
           <Button variant="secondary" onClick={() => dialogRef.current?.close()} disabled={isPending}>
             Cancel
           </Button>

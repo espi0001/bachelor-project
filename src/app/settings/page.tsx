@@ -33,8 +33,9 @@ async function SettingsCards() {
   }
 
   // Each Clerk organization only sees its own store.
-  const [store] = await sql<{ shopify_domain: string; last_synced_at: Date | null }[]>`
-    SELECT shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+  // id is a bigint, which postgres returns as a string.
+  const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
+    SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
   if (!store) redirect("/connect-store");
 
@@ -42,7 +43,11 @@ async function SettingsCards() {
   return (
     <div className="grid items-start gap-4 lg:grid-cols-2">
       <div className="flex flex-col gap-4">
-        <StoreConnectionCard shopDomain={store.shopify_domain} lastSyncedAt={store.last_synced_at} />
+        <StoreConnectionCard
+          storeId={store.id}
+          shopDomain={store.shopify_domain}
+          lastSyncedAt={store.last_synced_at}
+        />
       </div>
     </div>
   );

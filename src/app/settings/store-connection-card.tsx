@@ -12,11 +12,12 @@ const LAST_SYNCED_FORMAT = new Intl.DateTimeFormat("en-GB", {
 });
 
 type StoreConnectionCardProps = {
+  storeId: string;
   shopDomain: string;
   lastSyncedAt: Date | null;
 };
 
-export function StoreConnectionCard({ shopDomain, lastSyncedAt }: StoreConnectionCardProps) {
+export function StoreConnectionCard({ storeId, shopDomain, lastSyncedAt }: StoreConnectionCardProps) {
   const rows = [
     { label: "Store", value: shopDomain },
     { label: "Platform", value: "Shopify" },
@@ -41,7 +42,7 @@ export function StoreConnectionCard({ shopDomain, lastSyncedAt }: StoreConnectio
         ))}
       </dl>
       <div className="flex flex-wrap gap-2 pt-1">
-        <DisconnectStoreButton shopDomain={shopDomain} />
+        <DisconnectStoreButton storeId={storeId} shopDomain={shopDomain} />
       </div>
     </SettingsCard>
   );

@@ -46,8 +46,15 @@ export async function uploadGeneratedImage(path: string, data: Buffer, contentTy
 
 /** Deletes a generated image from the bucket. Deleting a file that does not exist is not an error. */
 export async function deleteGeneratedImage(path: string): Promise<void> {
-  const { error } = await bucket().remove([path]);
-  if (error) throw new Error(`Deleting ${path} from Storage failed: ${error.message}`);
+  await deleteGeneratedImages([path]);
+}
+
+/** Deletes several generated images in one request. Deleting files that do not exist is not an error. */
+export async function deleteGeneratedImages(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+
+  const { error } = await bucket().remove(paths);
+  if (error) throw new Error(`Deleting ${paths.length} file(s) from Storage failed: ${error.message}`);
 }
 
 /**
