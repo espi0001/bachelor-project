@@ -2,6 +2,7 @@
 /** Mobile navigation: the top bar (Figma Top bar 222:4150) with a burger button that slides in the menu panel (Figma M0 · Menu 162:1179). */
 
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Icon } from "@/components/ui/icon";
 import { Brand } from "./brand";
 import { NavItem } from "./nav-item";
@@ -10,6 +11,9 @@ import { SidebarFooter } from "./sidebar-footer";
 
 const ICON_BUTTON_CLASS =
   "flex cursor-pointer items-center justify-center rounded-md p-1.5 text-secondary hover:bg-subtle hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-100 dark:focus-visible:outline-blue-400";
+
+// Tailwind's md breakpoint, where the sidebar takes over from the mobile nav.
+const DESKTOP_MEDIA_QUERY = "(min-width: 48rem)";
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -27,15 +31,23 @@ export function MobileNav({ pathname }: { pathname: string }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // The open panel covers the burger button, so focus goes back to it when the menu closes.
+  // flushSync applies the close first: until then the top bar is still inert and focus() would do nothing.
   function closeMenu() {
-    setIsMenuOpen(false);
+    flushSync(() => setIsMenuOpen(false));
     menuButtonRef.current?.focus();
   }
 
-  // While open: focus the close button, keep Tab inside the panel, and close on Escape or a click outside it.
+  // While open: focus the close button, keep Tab inside the panel, and close on Escape, a click outside it,
+  // or when the screen grows to desktop size (md), where CSS hides the panel but the Tab trap would still run.
   useEffect(() => {
     if (!isMenuOpen) return;
     closeButtonRef.current?.focus();
+
+    // The menu can only be opened below md (the burger button is hidden above), so only the change needs handling.
+    const desktopQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    function handleBreakpoint(event: MediaQueryListEvent) {
+      if (event.matches) setIsMenuOpen(false);
+    }
 
     function handleClickOutside(event: MouseEvent) {
       const target = event.target;
@@ -47,7 +59,7 @@ export function MobileNav({ pathname }: { pathname: string }) {
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setIsMenuOpen(false);
+        flushSync(() => setIsMenuOpen(false));
         menuButtonRef.current?.focus();
         return;
       }
@@ -82,9 +94,11 @@ export function MobileNav({ pathname }: { pathname: string }) {
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
+    desktopQuery.addEventListener("change", handleBreakpoint);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
+      desktopQuery.removeEventListener("change", handleBreakpoint);
     };
   }, [isMenuOpen]);
 
