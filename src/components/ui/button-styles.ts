@@ -27,7 +27,10 @@ const FILLED_PADDING = {
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // Figma's disabled primary is the brand fill and white label both at 50%, the same as opacity-50.
   primary: `${FILLED_CLASSES} border-transparent bg-brand text-on-brand not-disabled:hover:bg-brand-hover disabled:opacity-50`,
-  secondary: `${FILLED_CLASSES} border-default bg-surface text-primary shadow-sm not-disabled:hover:bg-subtle disabled:border-subtle disabled:text-muted`,
+  // bg-subtle is see-through (5% black). Dark mode keeps the white button and dark label (Figma has
+  // no dark mode), so hover there needs an opaque fill or the label vanishes into the dark page.
+  // zinc-100 is about what 5% black over white looks like.
+  secondary: `${FILLED_CLASSES} border-default bg-surface text-primary shadow-sm not-disabled:hover:bg-subtle dark:not-disabled:hover:bg-zinc-100 disabled:border-subtle disabled:text-muted`,
   // Text only, like the Back link in Figma. `rounded-sm` keeps the focus outline from being a sharp box.
   tertiary: [
     "gap-1 rounded-sm text-secondary not-disabled:hover:text-primary not-disabled:hover:underline",
