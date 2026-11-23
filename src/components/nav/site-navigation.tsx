@@ -4,6 +4,7 @@
 import { usePathname } from "next/navigation";
 import { SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-routes";
 import { SiteHeader } from "@/components/site-header";
+import { MobileNav } from "./mobile-nav";
 import { NAV_ITEMS, Sidebar, isActivePath } from "./sidebar";
 
 export function SiteNavigation() {
@@ -15,11 +16,11 @@ export function SiteNavigation() {
   const hasSidebar = NAV_ITEMS.some((item) => isActivePath(pathname, item.href));
   if (!hasSidebar) return <SiteHeader />;
 
-  // The sidebar is desktop only. On small screens the header stays until the mobile top bar (BA-181) replaces it.
+  // The sidebar is desktop only. Small screens get the top bar with the burger menu instead.
   return (
     <>
       <Sidebar pathname={pathname} />
-      <SiteHeader className="md:hidden" />
+      <MobileNav pathname={pathname} />
     </>
   );
 }

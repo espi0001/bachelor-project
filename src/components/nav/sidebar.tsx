@@ -1,7 +1,7 @@
 /** Desktop sidebar (Figma Sidebar 176:1554): logo, links to the main pages with the current one marked Active, and the footer. */
 
 import type { IconName } from "@/components/ui/icon";
-import { Logo } from "@/components/ui/logo";
+import { Brand } from "./brand";
 import { NavItem } from "./nav-item";
 import { SidebarFooter } from "./sidebar-footer";
 
@@ -19,21 +19,17 @@ export function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-// Fixed to the left edge, so the page content does not have to be wrapped. The root layout's
-// <body> makes room for it with padding when the sidebar is on the page (data-sidebar).
+// As wide as its widest item (w-max), like the hug-contents sidebar in Figma, so a longer label
+// such as "Channels and requirements" widens it. The root layout's <body> becomes a row when the
+// sidebar is on the page (data-sidebar), and sticky keeps it in view while the page scrolls.
 export function Sidebar({ pathname }: { pathname: string }) {
   return (
     <aside
       data-sidebar
-      className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col justify-between overflow-y-auto border-r border-default bg-surface px-4 py-6 md:flex dark:border-white/15 dark:bg-zinc-950"
+      className="sticky top-0 hidden h-dvh w-max shrink-0 flex-col justify-between self-start overflow-y-auto border-r border-default bg-surface px-4 py-6 md:flex dark:border-white/15 dark:bg-zinc-950"
     >
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2.5 pb-6 pl-2">
-          <Logo />
-          <span className="typography-heading-section whitespace-nowrap text-primary dark:text-zinc-100">
-            Instant · Images
-          </span>
-        </div>
+        <Brand variant="desktop" className="pb-6 pl-2" />
         <nav aria-label="Main">
           <ul className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => (

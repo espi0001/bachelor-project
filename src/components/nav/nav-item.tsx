@@ -8,6 +8,7 @@ type NavItemProps = {
   icon: IconName;
   label: string;
   isActive: boolean;
+  onClick?: () => void;
 };
 
 // Figma has no hover state. Hover uses the Active background, so it is clear the item is a link.
@@ -16,10 +17,11 @@ const STATE_CLASSES = {
   active: "typography-label bg-subtle text-primary dark:bg-white/10 dark:text-zinc-100",
 } as const;
 
-export function NavItem({ href, icon, label, isActive }: NavItemProps) {
+export function NavItem({ href, icon, label, isActive, onClick }: NavItemProps) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       aria-current={isActive ? "page" : undefined}
       className={`flex w-full items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:focus-visible:outline-blue-400 ${STATE_CLASSES[isActive ? "active" : "default"]}`}
     >
