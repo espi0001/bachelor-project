@@ -1,14 +1,18 @@
 /**
- * One generated image waiting for approval: the original next to the generated image, its type, product and actions.
+ * One generated image waiting for approval, or approved but not yet in Shopify:
+ * the original next to the generated image, its type, product and actions.
  */
 
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RejectButton } from "./reject-button";
+import { ActionButton } from "./action-button";
+import { approveImage, rejectImage, retryUpload } from "./actions";
 
 type ApprovalCardProps = {
   imageId: string;
+  /** True if the image is approved but its upload to Shopify failed. Shows Retry instead of Approve. */
+  uploadFailed: boolean;
   /** Shown as the heading, e.g. "Packshot". */
   typeLabel: string;
   /** Null if the product was deleted in Shopify. */
@@ -20,7 +24,7 @@ type ApprovalCardProps = {
 
 const IMAGE_BOX_CLASSES = "aspect-square w-full rounded-md bg-subtle object-contain md:w-44";
 
-export function ApprovalCard({ imageId, typeLabel, productTitle, originalUrl, generatedUrl }: ApprovalCardProps) {
+export function ApprovalCard({ imageId, uploadFailed, typeLabel, productTitle, originalUrl, generatedUrl }: ApprovalCardProps) {
   const productName = productTitle ?? "Deleted product";
 
   return (
@@ -61,15 +65,31 @@ export function ApprovalCard({ imageId, typeLabel, productTitle, originalUrl, ge
         <p className="typography-body-sm text-secondary">
           {productTitle ?? "This product was deleted in Shopify."}
         </p>
-        {/* Hard-coded until the requirement checks exist. */}
-        <Badge variant="success">Label</Badge>
+        {uploadFailed ? (
+          <Badge variant="error">Upload failed</Badge>
+        ) : (
+          // Hard-coded until the requirement checks exist.
+          <Badge variant="success">Label</Badge>
+        )}
       </div>
 
-      {/* Approve and Generate again are not wired up yet: Approve comes in step 5, Generate again after that. */}
       <div className="flex flex-col gap-2 md:w-40">
-        <Button variant="primary">Approve</Button>
-        <Button variant="secondary">Generate again</Button>
-        <RejectButton imageId={imageId} />
+        {/* One button that changes label and action, not two buttons swapped by a condition: React then keeps
+            its state when a failed Approve turns the card into "Upload failed", so the error stays visible. */}
+        <ActionButton
+          action={uploadFailed ? retryUpload.bind(null, imageId) : approveImage.bind(null, imageId)}
+          variant="primary"
+          label={uploadFailed ? "Retry upload" : "Approve"}
+          pendingLabel="Uploading…"
+        />
+        {/* Not wired up yet: comes after the Approve steps. Hidden on a failed upload, which is already approved. */}
+        {!uploadFailed && <Button variant="secondary">Generate again</Button>}
+        <ActionButton
+          action={rejectImage.bind(null, imageId)}
+          variant="secondary"
+          label="Reject"
+          pendingLabel="Rejecting…"
+        />
       </div>
     </article>
   );
