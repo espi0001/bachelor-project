@@ -11,6 +11,8 @@ import { SidebarFooter } from "./sidebar-footer";
 const ICON_BUTTON_CLASS =
   "flex cursor-pointer items-center justify-center rounded-md p-1.5 text-secondary hover:bg-subtle hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-100 dark:focus-visible:outline-blue-400";
 
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 // The panel stays mounted so it can slide out again. `invisible` hides it from the keyboard and
 // screen readers when closed; visibility is in the transition so it only hides after the slide.
 const PANEL_STATE_CLASSES = {
@@ -30,7 +32,7 @@ export function MobileNav({ pathname }: { pathname: string }) {
     menuButtonRef.current?.focus();
   }
 
-  // While open: focus the close button, and close on Escape or a click outside the panel.
+  // While open: focus the close button, keep Tab inside the panel, and close on Escape or a click outside it.
   useEffect(() => {
     if (!isMenuOpen) return;
     closeButtonRef.current?.focus();
@@ -44,9 +46,38 @@ export function MobileNav({ pathname }: { pathname: string }) {
       setIsMenuOpen(false);
     }
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      setIsMenuOpen(false);
-      menuButtonRef.current?.focus();
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key === "Tab") trapFocus(event);
+    }
+
+    // On phones the panel covers the page, so Tab must not reach controls behind it.
+    // Wraps from the last focusable element to the first and back.
+    function trapFocus(event: KeyboardEvent) {
+      const panel = menuRef.current;
+      const active = document.activeElement;
+      if (!panel) return;
+      // Clerk handles focus inside its own popovers, which may sit outside the panel.
+      if (active instanceof Element && !panel.contains(active) && active.closest('[class*="cl-"]')) return;
+
+      const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+
+      if (!panel.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -59,7 +90,11 @@ export function MobileNav({ pathname }: { pathname: string }) {
 
   return (
     <nav aria-label="Main" className="md:hidden">
-      <div className="flex h-14 items-center justify-between border-b border-default bg-surface px-4 dark:border-white/15 dark:bg-zinc-950">
+      {/* inert while the menu is open: the panel covers the top bar, so its burger button must not be reachable. */}
+      <div
+        inert={isMenuOpen}
+        className="flex h-14 items-center justify-between border-b border-default bg-surface px-4 dark:border-white/15 dark:bg-zinc-950"
+      >
         <Brand variant="mobile" />
         <button
           ref={menuButtonRef}

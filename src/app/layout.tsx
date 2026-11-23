@@ -43,8 +43,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Suspense>
             <SiteNavigation />
           </Suspense>
-          <main className="mx-auto w-full px-4 md:px-10 py-8">
-          {children}
+          {/* flex-1 + flex-col lets pages fill the height (sign-in centers its form with flex-1).
+              min-w-0 lets main shrink next to the sidebar, so wide tables scroll inside their own wrapper. */}
+          <main className="mx-auto flex w-full min-w-0 flex-1 flex-col px-4 py-8 md:px-10">
+            {children}
           </main>
         </ClerkProvider>
       </body>
