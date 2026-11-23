@@ -22,11 +22,13 @@
     --background-color-surface: var(--color-white);
     --background-color-subtle: color-mix(in oklab, var(--color-zinc-950) 5%, transparent);
     --background-color-brand: var(--color-instant-blue);
-    /* Not in Figma: hover on brand buttons. 15% black, so the change is easy to see. */
-    --background-color-brand-hover: color-mix(in oklab, var(--color-instant-blue) 85%, black);
+    /* Hover on brand buttons — Figma Button Primary/Hover (225:1904) uses color/blue-800 */
+    --background-color-brand-hover: var(--color-blue-800);
 
     /* Borders */
     --border-color-default: color-mix(in oklab, var(--color-zinc-950) 10%, transparent);
+    /* Figma border/subtle — e.g. a disabled secondary button */
+    --border-color-subtle: color-mix(in oklab, var(--color-zinc-950) 5%, transparent);
 
     /* Status badges — background and text are always used as a pair,
        e.g. `bg-success text-success` */
