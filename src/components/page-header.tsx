@@ -21,9 +21,9 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
     // Stacked on phones so a long description does not squeeze the button; one row from sm up as in Figma.
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-3">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h1 className="typography-heading-page text-primary">{title}</h1>
+        <h1 className="typography-heading-page text-primary dark:text-zinc-100">{title}</h1>
         {description ? (
-          <p className="typography-body-sm text-secondary">{description}</p>
+          <p className="typography-body-sm text-secondary dark:text-zinc-400">{description}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
