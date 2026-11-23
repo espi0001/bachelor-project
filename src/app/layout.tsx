@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      {/* The sidebar is fixed to the left, so the body makes room for it on desktop when it is on the page. */}
-      <body className="min-h-full flex flex-col md:has-[[data-sidebar]]:pl-60">
+      {/* On desktop the sidebar and the page sit side by side, so the page gets the space the sidebar does not use. */}
+      <body className="min-h-full flex flex-col md:has-data-sidebar:flex-row">
         {/* Every sign-in and sign-up goes through /dashboard, which sends the user on to /products or /connect-store. Logout returns to the front page. */}
         <ClerkProvider
           signInUrl={SIGN_IN_URL}
@@ -43,7 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Suspense>
             <SiteNavigation />
           </Suspense>
+          <main className="mx-auto w-full px-4 md:px-10 py-8">
           {children}
+          </main>
         </ClerkProvider>
       </body>
     </html>

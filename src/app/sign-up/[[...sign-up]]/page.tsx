@@ -9,11 +9,11 @@ export const metadata = {
 
 export default function SignUpPage() {
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-8">
+    <div className="flex flex-1 items-center justify-center">
       {/* SignUp reads the URL (usePathname), so it must render inside Suspense (cacheComponents). */}
       <Suspense>
         <SignUp />
       </Suspense>
-    </main>
+    </div>
   );
 }

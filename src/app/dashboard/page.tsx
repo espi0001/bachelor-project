@@ -11,11 +11,11 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="">
       <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
         <RedirectToStart />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
