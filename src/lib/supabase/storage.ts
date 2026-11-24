@@ -49,12 +49,16 @@ export async function deleteGeneratedImage(path: string): Promise<void> {
   await deleteGeneratedImages([path]);
 }
 
-/** Deletes several generated images in one request. Deleting files that do not exist is not an error. */
+/** Deletes generated images in batches. Deleting files that do not exist is not an error. */
 export async function deleteGeneratedImages(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
 
-  const { error } = await bucket().remove(paths);
-  if (error) throw new Error(`Deleting ${paths.length} file(s) from Storage failed: ${error.message}`);
+  const maxBatchSize = 1000; // Supabase Storage's per-request deletion limit.
+  for (let offset = 0; offset < paths.length; offset += maxBatchSize) {
+    const batch = paths.slice(offset, offset + maxBatchSize);
+    const { error } = await bucket().remove(batch);
+    if (error) throw new Error(`Deleting ${batch.length} file(s) from Storage failed: ${error.message}`);
+  }
 }
 
 /**
