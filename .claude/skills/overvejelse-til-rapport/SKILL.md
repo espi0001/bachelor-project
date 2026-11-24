@@ -7,7 +7,7 @@ description: "Log et valg eller en overvejelse i bachelorprojektets 'Overvejelse
 
 > Samme skill ligger i Claude-projektet "Bachelor project". Ændres den ét sted, så ret den andet sted. Denne kopi har ikke dokument-id'et, fordi repoet er offentligt.
 
-Vejlederen vil have, at vi ikke "kun" løser opgaver, men analyserer og begrunder vores tilgang. For hver teori, metode og teknologi skal vi vise: hvilke muligheder der er, hvad vi valgte, og hvorfor.
+Vejlederen (Peter) vil have, at vi ikke "kun" løser opgaver, men analyserer og begrunder vores tilgang. For hver teori, metode og teknologi skal vi vise: hvilke muligheder der er, hvad vi valgte, og hvorfor.
 
 Denne skill gør en overvejelse eller beslutning til en struktureret post i "Overvejelser og valg" (Google Doc i Bachelor-mappen i Drive) og peger på, hvor den hører hjemme i "Bachelor rapport".
 
@@ -21,7 +21,8 @@ Brug den også, når brugeren beder om at "tjekke overvejelserne": gå de eksist
 - Er det uklart, så stil ét kort spørgsmål.
 
 ## 2. Læs først
-- "Overvejelser og valg": findes emnet allerede? Så byg videre på det i stedet for at lave en ny post.
+- "Overvejelser og valg": find den fane, emnet hører til (se listen i trin 4), og tjek om emnet allerede findes. Så byg videre på det i stedet for at lave en ny post.
+- Tjek også oversigtstabellen på fanen "Forside".
 - Indholdsfortegnelsen i "Bachelor rapport" (den kan have ændret sig).
 - Relevante mødeopsummeringer, hvis valget kommer fra et møde (så du kan henvise med tidskoder).
 
@@ -31,7 +32,32 @@ Brug den også, når brugeren beder om at "tjekke overvejelserne": gå de eksist
 - Find aldrig på kilder, tal eller udsagn.
 
 ## 4. Skriv posten
-Placér den under den passende overskrift i dokumentet (fx **Teknologi**, **Løsningen**, **Metode og proces**, **Research**). Opret en ny overskrift, hvis ingen passer.
+Dokumentet er delt op i faner efter emne. Placér posten i den fane, der passer:
+
+| Fane | Fx |
+|---|---|
+| Problem, idé og målgruppe | idé, problemformulering, målgruppe |
+| Scope og MVP | afgrænsning, MVP, nice to have |
+| Metode og proces | procesmodel, projektstyring, arbejdsgang, kildestil |
+| Krav og risici | kravspecifikation, risikoanalyse |
+| Research og data | interviews, empiri, dataindsamling |
+| Teknologi og arkitektur | stak, backend, arkitektur, datakilde, flows |
+| Login, roller og adgang | Clerk, roller, adgang for vejleder og censor |
+| Shopify-integration | forbindelse til butikker, nøgler, webhooks |
+| Database | databasevalg, datamodel, migrationer |
+| Udviklingsmiljø, Git og deployment | Vercel, CI, code review, branches, AI-opsætning i repoet |
+| AI og billedgenerering | billed-API'er, prompts, AI eller regler |
+| Overvågning af ændrede billedkrav | Google- og Meta-krav over tid |
+| AI-etik og AI i projektet | AI-mærkning, etik, brug af AI i arbejdet |
+| Design og UI | font, layout, visuel stil |
+| Test | teststrategi, brugertest |
+
+Regler for placering:
+- Inden for fanen står posterne efter dato. En opfølgning ("del 2", "opdatering") står lige under den post, den bygger videre på.
+- Passer ingen fane, så foreslå en ny fane i stedet for at lægge posten et tilfældigt sted.
+- Skriv aldrig i fanen "Arkiv (gammel version)".
+- Erstatter posten en ældre post, så lad den gamle stå og tilføj 🟡 **[Claude] Erstattet af:** "<ny post>" under den.
+- Tilføj en række i oversigtstabellen på "Forside" (Emne, Status, Dato, Fane). Når status ændres i en post, så ret også rækken.
 
 ```
 ### <Emne>
@@ -75,7 +101,7 @@ Foreslå en kort tekst (3–6 sætninger, sammenhængende tekst, ikke punkter) t
 ## 6. Godkendelse
 - Vis posten og rapportteksten først. Skriv først i dokumenterne, når brugeren siger ja.
 - Forslag som nummereret liste, fx:
-  1. Tilføj posten i "Overvejelser og valg" under <overskrift>
+  1. Tilføj posten i "Overvejelser og valg" i fanen <fane> (og en række på Forside)
   2. Tilføj teksten i rapporten under <afsnit>
   3. Tilføj kilderne i litteraturlisten
   4. Opret Jira-opgave i BA: <fx "Undersøg alternativer til X">
