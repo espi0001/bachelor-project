@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
 import { GenerateImagesDialog } from "@/components/generate-images-dialog";
 import { sql } from "@/lib/db";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProduct, productIdFromUrl, type Product } from "@/lib/shopify/products";
 
@@ -43,15 +44,7 @@ async function ProductDetail({ urlId }: { urlId: string }) {
     SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
   if (!store) {
-    return (
-      <p className="text-zinc-500">
-        No store connected.{" "}
-        <Link href="/connect-store" className="underline">
-          Connect a store
-        </Link>
-        .
-      </p>
-    );
+    return <ConnectStorePrompt description="Connect your store to see this product" />;
   }
 
   // The ID comes from the URL, so anyone can change it. Only plain numbers are valid,

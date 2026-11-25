@@ -29,12 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       {/* On desktop the sidebar and the page sit side by side, so the page gets the space the sidebar does not use. */}
       <body className="min-h-full flex flex-col md:has-data-sidebar:flex-row">
-        {/* Every sign-in and sign-up goes through /dashboard, which sends the user on to /products or /connect-store. Logout returns to the front page. */}
+        {/* Sign-in goes through /dashboard, which sends the user on to /products. Sign-up goes to /welcome, where the user connects a store or skips it. Logout returns to the front page. */}
         <ClerkProvider
           signInUrl={SIGN_IN_URL}
           signUpUrl={SIGN_UP_URL}
           signInFallbackRedirectUrl="/dashboard"
-          signUpFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/welcome"
           afterSignOutUrl="/"
           // Brand blue (--color-instant-blue) on buttons and links in Clerk's forms. Clerk needs the hex value.
           appearance={{ variables: { colorPrimary: "#0f3bfe" } }}

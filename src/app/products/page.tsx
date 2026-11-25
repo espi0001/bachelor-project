@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProducts } from "@/lib/shopify/products";
 import { ProductRow } from "@/components/product-row";
@@ -39,15 +40,7 @@ async function ProductList() {
     SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
   if (!store) {
-    return (
-      <p className="text-zinc-500">
-        No store connected.{" "}
-        <Link href="/connect-store" className="underline">
-          Connect a store
-        </Link>
-        .
-      </p>
-    );
+    return <ConnectStorePrompt description="Connect your store to see all your products" />;
   }
 
   let products: Awaited<ReturnType<typeof getProducts>>;

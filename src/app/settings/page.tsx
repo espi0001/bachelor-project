@@ -2,9 +2,9 @@
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
 
@@ -38,19 +38,22 @@ async function SettingsCards() {
   const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
     SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
-  if (!store) redirect("/connect-store");
-
   // Two columns as in Figma from lg up; the other cards (e.g. BA-184) go in these columns.
   // grid-cols-1 (minmax(0, 1fr)) lets the column shrink below its content on mobile. Without it the
   // implicit column grows to the longest unbreakable text (a member's email) and the page scrolls sideways.
   return (
     <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
       <div className="flex flex-col gap-4">
-        <StoreConnectionCard
-          storeId={store.id}
-          shopDomain={store.shopify_domain}
-          lastSyncedAt={store.last_synced_at}
-        />
+        {/* The user may have skipped connecting a store; the members card works without one. */}
+        {store ? (
+          <StoreConnectionCard
+            storeId={store.id}
+            shopDomain={store.shopify_domain}
+            lastSyncedAt={store.last_synced_at}
+          />
+        ) : (
+          <ConnectStorePrompt description="Fetch your products and images from Shopify" />
+        )}
       </div>
       <div className="flex flex-col gap-4">
         <OrganizationCard orgId={orgId} />
