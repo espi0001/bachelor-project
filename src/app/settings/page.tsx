@@ -1,4 +1,4 @@
-/** Settings page: the organization's store connection, AI rules, team and notifications in a grid of cards. */
+/** Settings page: the organization's store connection, AI rules, members and notifications in a grid of cards. */
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
 import { StoreConnectionCard } from "./store-connection-card";
+import { OrganizationCard } from "./organization-card";
 
 export const metadata = {
   title: "Settings",
@@ -39,15 +40,20 @@ async function SettingsCards() {
   `;
   if (!store) redirect("/connect-store");
 
-  // Two columns as in Figma from lg up; the other cards (BA-184, BA-185) go in these columns.
+  // Two columns as in Figma from lg up; the other cards (e.g. BA-184) go in these columns.
+  // grid-cols-1 (minmax(0, 1fr)) lets the column shrink below its content on mobile. Without it the
+  // implicit column grows to the longest unbreakable text (a member's email) and the page scrolls sideways.
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
       <div className="flex flex-col gap-4">
         <StoreConnectionCard
           storeId={store.id}
           shopDomain={store.shopify_domain}
           lastSyncedAt={store.last_synced_at}
         />
+      </div>
+      <div className="flex flex-col gap-4">
+        <OrganizationCard orgId={orgId} />
       </div>
     </div>
   );
