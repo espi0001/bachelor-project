@@ -17,7 +17,7 @@ They are the source of truth, not this file.
 | ---------------------- | ------------------------------------------------------------------------------------------------ |
 | `project-conventions`  | Any code change. Language, file headers, layout, naming, TypeScript, Clerk, database, styling, a11y. |
 | `ticket-handler`       | Building a BA ticket end to end (`/ticket-handler BA-123`).                                      |
-| `jira-ticket-tjek`     | Code work needs a ticket, or BA tickets need checking.                                           |
+| `jira-ticket-tjek`     | Code work needs a ticket, a feature must be split into tickets, or BA tickets need checking.     |
 | `pr-desc`              | Writing the pull request description for the current branch (`/pr-desc`).                        |
 | `overvejelse-til-rapport` | A real choice is made or compared (technology, architecture, method). Logs it for the report. |
 
