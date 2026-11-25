@@ -17,8 +17,11 @@ Kode kan bestå den ene akse og dumpe den anden. Derfor rapporteres de hver for 
 
 ## 1. Fastlæg udgangspunktet
 - Udgangspunktet er det, brugeren siger (branch, commit, `main`). Spørg, hvis det mangler.
-- Tjek at det findes (`git rev-parse <punkt>`), og at diffen ikke er tom.
-- Diff: `git diff <punkt>...HEAD`. Commits: `git log <punkt>..HEAD --oneline`.
+- Tjek at udgangspunktet findes (`git rev-parse <punkt>`).
+- Ved review af en committet branch/PR: `git diff <punkt>...HEAD`.
+- Ved igangværende arbejde eller kald fra `ticket-handler`: `git diff "$(git merge-base <punkt> HEAD)"` for committed, staged og unstaged ændringer. Find også nye, ikke-ignorerede filer med `git ls-files --others --exclude-standard`, og læs deres indhold som tilføjelser i reviewet.
+- Commits: `git log <punkt>..HEAD --oneline`.
+- Giv begge agenter det valgte reviewgrundlag, inklusive de nye filer ved igangværende arbejde. Tjek først, om reviewet er tomt, når hele dette grundlag er med.
 - Arbejd i en lokal klon af espi0001/bachelor-project. Er der ingen, så spørg.
 
 ## 2. Find spec (Jira)
