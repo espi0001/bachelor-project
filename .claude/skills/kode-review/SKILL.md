@@ -30,7 +30,7 @@ Led efter ticket-nøgler (`BA-123`) i denne rækkefølge:
 2. Commit-beskederne
 3. Det, brugeren skriver
 
-Hent ticketen med Atlassian MCP: beskrivelse, acceptkriterier og forælder-ticket. Findes der ingen ticket, så sig det, og spring Spec-aksen over. Det er også et fund, fordi al kode skal have en ticket.
+Hent ticketen med Atlassian MCP: beskrivelse, acceptkriterier, kommentarer, links og forælder-ticket. Nyeste kommentar vinder, hvis noget modsiger beskrivelsen; sig det, og giv Spec-agenten de gældende kriterier sammen med de relevante kommentarer. Findes der ingen ticket, så sig det, og spring Spec-aksen over. Det er også et fund, fordi al kode skal have en ticket.
 
 ## 3. Find standarder
 Find alle filer i repoet, der beskriver, hvordan koden skal skrives. I dette repo er det altid skillen `project-conventions`, afsnittet "Non-obvious constraints" i `AGENTS.md` og `GLOSSARY.md` (navne i koden). Tag også `README.md` og lint- og TypeScript-opsætningen med. Det, værktøjerne allerede tjekker (ESLint, Prettier, `tsc`), skal ikke med i reviewet.
