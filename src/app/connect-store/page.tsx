@@ -26,7 +26,7 @@ const CALLBACK_ERRORS: Record<string, string> = {
 
 export default function ConnectStorePage({ searchParams }: PageProps<'/connect-store'>) {
   return (
-    <div className="">
+    <div className="flex justify-center">
       <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
         <ConnectStoreGate searchParams={searchParams} />
       </Suspense>
