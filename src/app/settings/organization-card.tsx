@@ -91,7 +91,7 @@ export async function OrganizationCard({ orgId }: OrganizationCardProps) {
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate typography-label-sm text-primary dark:text-zinc-100">{member.name}</span>
                 {member.email && member.email !== member.name ? (
-                  <span className="truncate typography-body-sm text-muted dark:text-zinc-500">{member.email}</span>
+                  <span className="truncate typography-body-sm text-secondary dark:text-zinc-400">{member.email}</span>
                 ) : null}
               </div>
               <span className="shrink-0 typography-body-sm text-secondary dark:text-zinc-400">{member.role}</span>
