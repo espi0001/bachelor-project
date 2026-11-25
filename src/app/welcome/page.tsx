@@ -19,11 +19,11 @@ export default function WelcomePage() {
             Connect your store so we can check your product images against the requirements from Google and Meta.
           </p>
         </div>
-        <ConnectStorePrompt description="Fetch your products and images from Shopify" />
+        <ConnectStorePrompt />
         {/* Skipping is allowed: pages that need a store show the same card until one is connected. */}
         <Link
-          href="/products"
-          className="rounded-sm typography-label text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:text-blue-400 dark:focus-visible:outline-blue-400"
+          href="/overview"
+          className="rounded-sm typography-label text-brand hover:underline focus-ring dark:text-blue-400"
         >
           Skip for now
         </Link>

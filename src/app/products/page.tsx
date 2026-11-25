@@ -5,8 +5,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/db";
 import { ConnectStorePrompt } from "@/components/connect-store-prompt";
+import { getStoreForOrg } from "@/lib/store";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProducts } from "@/lib/shopify/products";
 import { ProductRow } from "@/components/product-row";
@@ -36,9 +36,7 @@ async function ProductList() {
     return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
-  const [store] = await sql<{ shopify_domain: string }[]>`
-    SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
+  const store = await getStoreForOrg(orgId);
   if (!store) {
     return <ConnectStorePrompt description="Connect your store to see all your products" />;
   }

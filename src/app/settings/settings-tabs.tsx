@@ -67,7 +67,7 @@ export function SettingsTabs({ tabs }: { tabs: SettingsTab[] }) {
                 onKeyDown={(event) => handleKeyDown(event, index)}
                 // The tab sits on top of the grey line, as in Figma: overlapping it (-mb-px) made the bar
                 // 1px taller than its scroll box and caused vertical scrolling.
-                className={`shrink-0 cursor-pointer whitespace-nowrap border-b-2 px-0.5 pb-3 pt-1 typography-label focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:focus-visible:outline-blue-400 ${STATE_CLASSES[isActive ? "active" : "default"]}`}
+                className={`shrink-0 cursor-pointer whitespace-nowrap border-b-2 px-0.5 pb-3 pt-1 typography-label focus-ring ${STATE_CLASSES[isActive ? "active" : "default"]}`}
               >
                 {tab.label}
               </button>

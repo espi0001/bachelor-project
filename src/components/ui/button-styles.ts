@@ -10,8 +10,7 @@ export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 // Hover styles use `not-disabled:` so a disabled button keeps its disabled look under the mouse.
 const BASE_CLASSES = [
   "inline-flex cursor-pointer items-center justify-center whitespace-nowrap typography-label",
-  // Brand blue has only 2.9:1 contrast on the dark page, below WCAG AA's 3:1, so dark mode uses blue-400 (7.5:1).
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:focus-visible:outline-blue-400",
+  "focus-ring",
   "disabled:cursor-not-allowed",
 ].join(" ");
 

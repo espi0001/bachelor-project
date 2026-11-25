@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/db";
+import { getStoreForOrg } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { StoreConnectionCard } from "./store-connection-card";
@@ -36,10 +36,7 @@ async function SettingsContent() {
   }
 
   // Each Clerk organization only sees its own store.
-  // id is a bigint, which postgres returns as a string.
-  const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
-    SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
+  const store = await getStoreForOrg(orgId);
   return (
     <SettingsTabs
       tabs={[
@@ -54,7 +51,7 @@ async function SettingsContent() {
               lastSyncedAt={store.last_synced_at}
             />
           ) : (
-            <ConnectStorePrompt description="Fetch your products and images from Shopify" />
+            <ConnectStorePrompt />
           ),
         },
         { id: "organization", label: "Organization", content: <OrganizationCard orgId={orgId} /> },
