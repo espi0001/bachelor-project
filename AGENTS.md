@@ -17,11 +17,20 @@ They are the source of truth, not this file.
 | ---------------------- | ------------------------------------------------------------------------------------------------ |
 | `project-conventions`  | Any code change. Language, file headers, layout, naming, TypeScript, Clerk, database, styling, a11y. |
 | `ticket-handler`       | Building a BA ticket end to end (`/ticket-handler BA-123`).                                      |
-| `jira-ticket-tjek`     | Code work needs a ticket, or BA tickets need checking.                                           |
+| `jira-ticket-tjek`     | Code work needs a ticket, a ticket or feature must be split into tickets, or BA tickets need checking. |
+| `kode-review`          | Reviewing a branch or PR against `project-conventions` and the BA ticket's acceptance criteria.  |
 | `pr-desc`              | Writing the pull request description for the current branch (`/pr-desc`).                        |
 | `overvejelse-til-rapport` | A real choice is made or compared (technology, architecture, method). Logs it for the report. |
 
 Cursor gets a short version of `project-conventions` via `.cursor/rules/project-conventions.mdc`.
+
+Usual order for a feature: `jira-ticket-tjek` (split if needed) → `ticket-handler` → `kode-review` → `pr-desc`.
+
+`jira-ticket-tjek`, `kode-review` and `overvejelse-til-rapport` also live in the Claude project "Bachelor project". If you change one, change the other copy too.
+
+## Words
+
+`GLOSSARY.md` is the one place for domain terms. Use its English names in code and UI, and its Danish words in Jira and the report. A new term goes in `GLOSSARY.md` in the same PR.
 
 ## Non-obvious constraints
 
