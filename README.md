@@ -13,6 +13,7 @@ Current skills:
 
 - `ticket-handler`: builds a BA ticket from start to finish. Run `/ticket-handler BA-123`.
 - `jira-ticket-tjek`: creates, splits or checks Jira tickets in BA.
+- `kode-review`: reviews a branch or PR on two axes, Standards (`project-conventions`) and Spec (the BA ticket's acceptance criteria). `ticket-handler` runs it before you open a PR.
 - `project-conventions`: code conventions for `src/` and `supabase/migrations/` (language, file headers, structure, Clerk orgs, database, secrets, styling, accessibility). Loads by itself when the agent writes or reviews code. Cursor also gets a short version in `.cursor/rules/project-conventions.mdc`, so update both when you change a rule.
 
 ### Add a rule

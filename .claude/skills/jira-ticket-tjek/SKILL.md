@@ -5,9 +5,9 @@ description: Opret, opdel eller tjek Jira-tickets til kodeopgaver i BA: find eks
 
 # Jira-ticket-tjek (BA)
 
-Jira: esterworkwork.atlassian.net, projektnøgle **BA**.
-
 > Samme skill ligger i Claude-projektet "Bachelor project". Ændres den ét sted, så ret den andet sted.
+
+Jira: esterworkwork.atlassian.net, projektnøgle **BA**.
 
 ## Hvad skal have en ticket
 - **Al kode skal have en ticket.** Fx features, komponenter, bugs, opsætning, refaktorering.
