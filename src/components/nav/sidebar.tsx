@@ -10,7 +10,6 @@ export const NAV_ITEMS: { href: string; icon: IconName; label: string }[] = [
   { href: "/overview", icon: "overview", label: "Overview" },
   { href: "/products", icon: "products", label: "Products" },
   { href: "/approval", icon: "check-circle", label: "Approval" },
-  { href: "/channels", icon: "feeds", label: "Channels and requirements" },
   { href: "/settings", icon: "settings", label: "Settings" },
 ];
 

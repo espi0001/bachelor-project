@@ -1,4 +1,4 @@
-/** Settings page: the organization's store connection, AI rules, members and notifications in a grid of cards. */
+/** Settings page: tabs for the store connection, the organization's members and the visual tone of voice. */
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/page-header";
 import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
+import { SettingsCard } from "./settings-card";
+import { SettingsTabs } from "./settings-tabs";
 
 export const metadata = {
   title: "Settings",
@@ -20,14 +22,14 @@ export default function SettingsPage() {
         description="Manage the store connection, the rules for AI images and who has access."
       />
       <Suspense fallback={<p className="text-secondary dark:text-zinc-400">Loading settings…</p>}>
-        <SettingsCards />
+        <SettingsContent />
       </Suspense>
     </div>
   );
 }
 
 // auth() and the DB read are per request, so they must render inside Suspense (cacheComponents).
-async function SettingsCards() {
+async function SettingsContent() {
   const { orgId } = await auth.protect();
   if (!orgId) {
     return <p className="text-secondary dark:text-zinc-400">Select an organization first.</p>;
@@ -38,26 +40,37 @@ async function SettingsCards() {
   const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
     SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
-  // Two columns as in Figma from lg up; the other cards (e.g. BA-184) go in these columns.
-  // grid-cols-1 (minmax(0, 1fr)) lets the column shrink below its content on mobile. Without it the
-  // implicit column grows to the longest unbreakable text (a member's email) and the page scrolls sideways.
+  if (!store) redirect("/connect-store");
+
   return (
-    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-      <div className="flex flex-col gap-4">
-        {/* The user may have skipped connecting a store; the members card works without one. */}
-        {store ? (
-          <StoreConnectionCard
-            storeId={store.id}
-            shopDomain={store.shopify_domain}
-            lastSyncedAt={store.last_synced_at}
-          />
-        ) : (
-          <ConnectStorePrompt description="Fetch your products and images from Shopify" />
-        )}
-      </div>
-      <div className="flex flex-col gap-4">
-        <OrganizationCard orgId={orgId} />
-      </div>
-    </div>
+    <SettingsTabs
+      tabs={[
+        {
+          id: "store-connection",
+          label: "Store connection",
+          content: (
+            <StoreConnectionCard
+              storeId={store.id}
+              shopDomain={store.shopify_domain}
+              lastSyncedAt={store.last_synced_at}
+            />
+          ),
+        },
+        { id: "organization", label: "Organization", content: <OrganizationCard orgId={orgId} /> },
+        {
+          id: "visual-tone-of-voice",
+          label: "Visual tone of voice",
+          // Placeholder until the style from a reference image is built (BA-148).
+          content: (
+            <SettingsCard
+              title="Visual tone of voice"
+              description="Upload a reference image, and AI turns its light, colours and mood into a style for your AI images."
+            >
+              <p className="typography-body-sm text-muted dark:text-zinc-500">Coming soon.</p>
+            </SettingsCard>
+          ),
+        },
+      ]}
+    />
   );
 }
