@@ -40,20 +40,21 @@ async function SettingsContent() {
   const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
     SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
-  if (!store) redirect("/connect-store");
-
   return (
     <SettingsTabs
       tabs={[
         {
           id: "store-connection",
           label: "Store connection",
-          content: (
+          // The user may have skipped connecting a store; the other tabs work without one.
+          content: store ? (
             <StoreConnectionCard
               storeId={store.id}
               shopDomain={store.shopify_domain}
               lastSyncedAt={store.last_synced_at}
             />
+          ) : (
+            <ConnectStorePrompt description="Fetch your products and images from Shopify" />
           ),
         },
         { id: "organization", label: "Organization", content: <OrganizationCard orgId={orgId} /> },
