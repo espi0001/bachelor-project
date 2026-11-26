@@ -2,9 +2,9 @@
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { sql } from "@/lib/db";
+import { getStoreForOrg } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
 import { SettingsCard } from "./settings-card";
@@ -36,24 +36,22 @@ async function SettingsContent() {
   }
 
   // Each Clerk organization only sees its own store.
-  // id is a bigint, which postgres returns as a string.
-  const [store] = await sql<{ id: string; shopify_domain: string; last_synced_at: Date | null }[]>`
-    SELECT id, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
-  if (!store) redirect("/connect-store");
-
+  const store = await getStoreForOrg(orgId);
   return (
     <SettingsTabs
       tabs={[
         {
           id: "store-connection",
           label: "Store connection",
-          content: (
+          // The user may have skipped connecting a store; the other tabs work without one.
+          content: store ? (
             <StoreConnectionCard
               storeId={store.id}
               shopDomain={store.shopify_domain}
               lastSyncedAt={store.last_synced_at}
             />
+          ) : (
+            <ConnectStorePrompt />
           ),
         },
         { id: "organization", label: "Organization", content: <OrganizationCard orgId={orgId} /> },
