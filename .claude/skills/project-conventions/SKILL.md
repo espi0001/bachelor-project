@@ -191,4 +191,4 @@ npx supabase migration new <name>    # new empty migration
 - Never run migrations against the linked database (`supabase db push`) without asking first. It is the real database.
 - Run `npm run lint` and `npm run build` before you say you are done. `build` catches errors that `dev` does not show (e.g. a missing `<Suspense>`).
 - There is no test runner. Do not write tests unless someone asks for it.
-- Git: the user makes the branch, commit, push and PR themselves. Only suggest a branch name (see the `ticket-handler` skill).
+- Git: the user makes the branch, commit, push and PR themselves. Only suggest a branch name (see the `jira-ticket-tjek` skill).
