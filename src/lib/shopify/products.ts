@@ -28,7 +28,7 @@ const PRODUCTS_PAGE_SIZE = 50;
 const IMAGES_PER_PRODUCT = 250;
 // The list stays lower: Shopify rejects queries whose estimated cost is over 1,000 points, and the
 // estimate multiplies products by media. Images after the first 50 are not returned.
-const IMAGES_PER_PRODUCT_IN_LIST = 50;
+export const IMAGES_PER_PRODUCT_IN_LIST = 50;
 
 const PRODUCT_GID_PREFIX = "gid://shopify/Product/";
 

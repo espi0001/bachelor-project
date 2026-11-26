@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Icon } from "@/components/ui/icon";
 import { productUrlId, type Product } from "@/lib/shopify/products";
-import { issueLabel, type ImageIssue } from "./image-requirements";
+import { issueLabel, issueTitle, type ImageIssue } from "./image-requirements";
 import {
   FILTER_LABEL,
   STATUS_LABEL,
@@ -71,7 +71,9 @@ export function IssuesTable({ rows, query }: IssuesTableProps) {
                 </th>
                 <td className="px-4 py-4 text-secondary dark:text-zinc-400">{STATUS_LABEL[product.status]}</td>
                 <td className="px-4 py-4 text-primary dark:text-zinc-100">{product.images.length}</td>
-                <td className="px-4 py-4 text-secondary dark:text-zinc-400">{issueLabel(issues)}</td>
+                <td className="px-4 py-4 text-secondary dark:text-zinc-400" title={issueTitle(issues)}>
+                  {issueLabel(issues)}
+                </td>
                 <td className="px-4 py-4 text-right">
                   <ButtonLink href={`/products/${productUrlId(product.id)}`} variant="secondary">
                     Open
