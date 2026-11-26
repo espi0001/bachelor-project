@@ -6,16 +6,19 @@ import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { forgetAccessToken } from '@/lib/shopify/client';
 import { deleteGeneratedImages } from '@/lib/supabase/storage';
+import { ADMIN_ROLE } from '@/lib/roles';
 
 export type DisconnectStoreState = { error?: string };
 
 /**
- * Deletes the store the user confirmed, its generated_image rows (ON DELETE CASCADE) and their files
+ * Admins only. Deletes the store the user confirmed, its generated_image rows (ON DELETE CASCADE) and their files
  * in Storage. The app installed in Shopify is left as it is.
  */
 export async function disconnectStore(_prev: DisconnectStoreState, formData: FormData): Promise<DisconnectStoreState> {
-  const { orgId } = await auth();
+  const { orgId, has } = await auth();
   if (!orgId) return { error: 'Select an organization first.' };
+  // The page hides the button from members, but anyone can call a server action directly.
+  if (!has({ role: ADMIN_ROLE })) return { error: 'Only admins can disconnect the store.' };
 
   // The id of the store shown in the dialog. Without it, a dialog left open while the store was
   // replaced (another tab or member) would delete the new store. auth_org_id still decides access.
