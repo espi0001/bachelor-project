@@ -29,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       {/* On desktop the sidebar and the page sit side by side, so the page gets the space the sidebar does not use. */}
       <body className="min-h-full flex flex-col md:has-data-sidebar:flex-row">
-        {/* Sign-in goes through /dashboard, which sends the user to /products, or to /welcome without a store. Sign-up goes straight to /welcome, where the user connects a store or skips it. Logout returns to the front page. */}
+        {/* Sign-in goes through /dashboard, which sends the user to /overview. Sign-up goes straight to /welcome, where the user connects a store or skips it. Logout returns to the front page. */}
         <ClerkProvider
           signInUrl={SIGN_IN_URL}
           signUpUrl={SIGN_UP_URL}
