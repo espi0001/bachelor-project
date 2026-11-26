@@ -13,10 +13,24 @@ import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
 import { ApprovalCard } from "@/components/approval-card";
 import { UPLOAD_TIMEOUT } from "./upload-timeout";
+import { PageHeader } from "@/components/page-header";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
+import { getStoreForOrg } from "@/lib/store";
 
 export const metadata = {
   title: "Approval",
 };
+
+export default function ApprovalPage() {
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Approval" description="Approve or reject AI images before they go to your store." />
+      <Suspense fallback={<p className="text-secondary dark:text-zinc-400">Loading…</p>}>
+        <ApprovalContent />
+      </Suspense>
+    </div>
+  );
+}
 
 type DraftImage = {
   id: string;
@@ -30,40 +44,17 @@ type DraftImage = {
   upload_failed: boolean;
 };
 
-export default function ApprovalPage() {
-  return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="mb-6 typography-heading-page text-primary">Approval</h1>
-      <Suspense fallback={<p className="text-secondary">Loading images…</p>}>
-        <DraftList />
-      </Suspense>
-    </main>
-  );
-}
-
-async function DraftList() {
-  // Only signed-in users may see store data.
-  await auth.protect();
-
-  // Each Clerk organization only sees its own store.
-  const { orgId } = await auth();
+// auth() and the DB read are per request, so they must render inside Suspense (cacheComponents).
+async function ApprovalContent() {
+  const { orgId } = await auth.protect();
   if (!orgId) {
-    return <p className="text-secondary">Select an organization first.</p>;
+    return <p className="text-secondary dark:text-zinc-400">Select an organization first.</p>;
   }
 
-  const [store] = await sql<{ id: string; shopify_domain: string }[]>`
-    SELECT id, shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
+  // Each Clerk organization only sees its own store.
+  const store = await getStoreForOrg(orgId);
   if (!store) {
-    return (
-      <p className="text-secondary">
-        No store connected.{" "}
-        <Link href="/connect-store" className="underline">
-          Connect a store
-        </Link>
-        .
-      </p>
-    );
+    return <ConnectStorePrompt description="Connect your store to see images waiting for approval" />;
   }
 
   // The join on auth_org_id is the org check itself, not only the store lookup above.
