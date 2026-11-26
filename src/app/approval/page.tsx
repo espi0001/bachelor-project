@@ -12,6 +12,7 @@ import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
 import { ApprovalCard } from "@/components/approval-card";
+import { UPLOAD_TIMEOUT } from "./upload-timeout";
 
 export const metadata = {
   title: "Approval",
@@ -23,7 +24,9 @@ type DraftImage = {
   type: string;
   source_image_url: string;
   storage_path: string;
-  /** True for an approved image whose upload to Shopify failed. */
+  /** True for an approved image that is being uploaded to Shopify right now. */
+  uploading: boolean;
+  /** True for an approved image whose upload to Shopify failed (or crashed). */
   upload_failed: boolean;
 };
 
@@ -64,12 +67,16 @@ async function DraftList() {
   }
 
   // The join on auth_org_id is the org check itself, not only the store lookup above.
-  // An approved image without a media ID is one whose upload failed; it stays here until it is retried or rejected.
-  // Failed uploads come first, so they are not missed below a long list of drafts.
+  // An approved image without a media ID is uploading (started less than UPLOAD_TIMEOUT ago) or failed;
+  // it stays here until it is in Shopify or rejected. Failed uploads come first, so they are not missed
+  // below a long list of drafts.
   const drafts = await sql<DraftImage[]>`
-    SELECT gi.id, gi.shopify_product_id, gi.type, gi.source_image_url, gi.storage_path,
-           gi.status = 'approved' AS upload_failed
+    SELECT gi.id, gi.shopify_product_id, gi.type, gi.source_image_url, gi.storage_path, uploading,
+           gi.status = 'approved' AND NOT uploading AS upload_failed
     FROM generated_image gi
+    CROSS JOIN LATERAL (
+      SELECT coalesce(gi.upload_started_at > now() - ${UPLOAD_TIMEOUT}::interval, false) AS uploading
+    ) u
     JOIN store s ON s.id = gi.store_id
     WHERE s.auth_org_id = ${orgId}
       AND (gi.status = 'draft' OR (gi.status = 'approved' AND gi.shopify_media_id IS NULL))
@@ -115,6 +122,7 @@ async function DraftList() {
         <li key={draft.id}>
           <ApprovalCard
             imageId={draft.id}
+            uploading={draft.uploading}
             uploadFailed={draft.upload_failed}
             // The type column is checked in the app, not the database, so an unknown value is shown as-is.
             typeLabel={isImageType(draft.type) ? IMAGE_TYPE_LABELS[draft.type] : draft.type}

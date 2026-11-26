@@ -14,6 +14,8 @@ export type ApprovalChange = "uploaded" | "rejected" | "uploadFailed";
 
 type ApprovalCardProps = {
   imageId: string;
+  /** True while the image is being uploaded, e.g. started from another tab. Shows no buttons, since the server refuses them. */
+  uploading?: boolean;
   /** True if the image is approved but its upload to Shopify failed. Shows Retry instead of Approve. */
   uploadFailed: boolean;
   /** When set, the card shows the result instead of the buttons. */
@@ -35,6 +37,7 @@ const IMAGE_BOX_CLASSES = "aspect-square w-full rounded-md bg-subtle object-cont
 
 export function ApprovalCard({
   imageId,
+  uploading = false,
   uploadFailed,
   outcome,
   onChange,
@@ -103,6 +106,8 @@ export function ApprovalCard({
               <Badge variant="success">Uploaded to Shopify</Badge>
             ) : outcome === "rejected" ? (
               <Badge variant="warning">Rejected</Badge>
+            ) : uploading ? (
+              <Badge variant="warning">Uploading…</Badge>
             ) : uploadFailed ? (
               <Badge variant="error">Upload failed</Badge>
             ) : (
@@ -112,7 +117,7 @@ export function ApprovalCard({
           </div>
         </div>
 
-        {!outcome && (
+        {!outcome && !uploading && (
           <div className="flex flex-col gap-2 @3xl:w-40">
             {/* One button that changes label and action, not two buttons swapped by a condition: React then keeps
                 its state when a failed Approve turns the card into "Upload failed", so the error stays visible. */}

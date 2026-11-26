@@ -12,6 +12,7 @@ import { ShopifyAuthError } from "@/lib/shopify/client";
 import { addProductImage } from "@/lib/shopify/media";
 import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
+import { UPLOAD_TIMEOUT } from "./upload-timeout";
 
 export type ApprovalResult =
   | { ok: true }
@@ -48,13 +49,13 @@ export async function approveImage(imageIdFromBrowser: string): Promise<Approval
   const { orgId } = await auth();
   if (!orgId) return { ok: false, error: "Select an organization first." };
 
-  // 3. Approve. Only one request can move an image out of 'draft', so a double click
-  // or a second tab cannot upload the same image twice. The join is the org check.
+  // 3. Approve and mark the upload as started. Only one request can move an image out of 'draft', so a double
+  // click or a second tab cannot upload the same image twice. The join is the org check.
   let image: ImageToUpload;
   try {
     const [approved] = await sql<ImageToUpload[]>`
       UPDATE generated_image gi
-      SET status = 'approved'
+      SET status = 'approved', upload_started_at = now()
       FROM store s
       WHERE gi.id = ${imageId}
         AND gi.store_id = s.id
@@ -88,27 +89,32 @@ export async function retryUpload(imageIdFromBrowser: string): Promise<ApprovalR
   const { orgId } = await auth();
   if (!orgId) return { ok: false, error: "Select an organization first." };
 
-  // 3. Only an approved image that is not in Shopify yet can be retried. The join is the org check.
+  // 3. Mark the upload as started, if the image is approved, not in Shopify, and not being uploaded right now
+  // (or that upload crashed). One statement checks and claims, so two retries at once cannot both upload.
+  // The join is the org check.
   let image: ImageToUpload;
   try {
     const [failed] = await sql<ImageToUpload[]>`
-      SELECT gi.shopify_product_id, gi.type, gi.storage_path, s.shopify_domain
-      FROM generated_image gi
-      JOIN store s ON s.id = gi.store_id
+      UPDATE generated_image gi
+      SET upload_started_at = now()
+      FROM store s
       WHERE gi.id = ${imageId}
+        AND gi.store_id = s.id
         AND s.auth_org_id = ${orgId}
         AND gi.status = 'approved'
         AND gi.shopify_media_id IS NULL
+        AND (gi.upload_started_at IS NULL OR gi.upload_started_at < now() - ${UPLOAD_TIMEOUT}::interval)
+      RETURNING gi.shopify_product_id, gi.type, gi.storage_path, s.shopify_domain
     `;
-    if (!failed) return { ok: false, error: "The image was not found or has already been uploaded." };
+    if (!failed) {
+      return { ok: false, error: "The image was not found, is being uploaded, or has already been uploaded." };
+    }
     image = failed;
   } catch (e) {
-    console.error(`Loading image ${imageId} for retry failed:`, e);
+    console.error(`Starting the retry of image ${imageId} failed:`, e);
     return { ok: false, error: "The upload could not be retried. Try again." };
   }
 
-  // Known limit: unlike approving, two retries at the same moment (e.g. two tabs) could both upload.
-  // The button is disabled while it runs, so one tab cannot do it.
   const result = await uploadToShopify(imageId, image);
 
   // 4. Load the page again, so the card disappears on success, or shows the latest state on failure.
@@ -118,9 +124,25 @@ export async function retryUpload(imageIdFromBrowser: string): Promise<ApprovalR
 
 /**
  * Adds an approved image to its product in Shopify and records the upload. Shared by approve and retry.
- * Callers have already checked that the image belongs to the org.
+ * Callers have already checked that the image belongs to the org and marked the upload as started.
+ * If the upload fails, the mark is removed again, so the image can be retried or rejected straight away.
  */
 async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<ApprovalResult> {
+  const result = await tryUpload(imageId, image);
+  if (!result.ok) await releaseUpload(imageId);
+  return result;
+}
+
+/** Removes the "upload started" mark. If that fails, the image becomes retryable after UPLOAD_TIMEOUT instead. */
+async function releaseUpload(imageId: string): Promise<void> {
+  try {
+    await sql`UPDATE generated_image SET upload_started_at = NULL WHERE id = ${imageId}`;
+  } catch (e) {
+    console.error(`Could not clear upload_started_at on image ${imageId}. It can be retried after ${UPLOAD_TIMEOUT}:`, e);
+  }
+}
+
+async function tryUpload(imageId: string, image: ImageToUpload): Promise<ApprovalResult> {
   // 1. Upload.
   let mediaId: string;
   try {
@@ -156,7 +178,7 @@ async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<A
   try {
     await sql`
       UPDATE generated_image
-      SET shopify_media_id = ${mediaId}, uploaded_at = now()
+      SET shopify_media_id = ${mediaId}, uploaded_at = now(), upload_started_at = NULL
       WHERE id = ${imageId}
     `;
   } catch (e) {
@@ -176,6 +198,7 @@ async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<A
 
 /**
  * Rejects a draft image, or an approved image whose upload failed (it is not in Shopify, so nothing needs undoing).
+ * An image that is being uploaded cannot be rejected: it may be in Shopify a few seconds later.
  * The file stays in Storage, so the decision can be looked up later.
  * The image ID comes from the browser, so the update only matches an image in the org's own store.
  */
@@ -190,22 +213,30 @@ export async function rejectImage(imageIdFromBrowser: string): Promise<ApprovalR
     if (!orgId) return { ok: false, error: "Select an organization first." };
 
     // 3. One statement checks access and updates, so nothing can change in between.
-    // An image that is already in Shopify cannot be rejected here.
+    // An image that is already in Shopify, or being uploaded, cannot be rejected here.
+    // A crashed upload's mark is cleared, because only approved images may have one.
     const updated = await sql<{ id: string }[]>`
       UPDATE generated_image gi
-      SET status = 'rejected'
+      SET status = 'rejected', upload_started_at = NULL
       FROM store s
       WHERE gi.id = ${imageId}
         AND gi.store_id = s.id
         AND s.auth_org_id = ${orgId}
-        AND (gi.status = 'draft' OR (gi.status = 'approved' AND gi.shopify_media_id IS NULL))
+        AND (
+          gi.status = 'draft'
+          OR (
+            gi.status = 'approved'
+            AND gi.shopify_media_id IS NULL
+            AND (gi.upload_started_at IS NULL OR gi.upload_started_at < now() - ${UPLOAD_TIMEOUT}::interval)
+          )
+        )
       RETURNING gi.id
     `;
 
-    // Wrong ID, another org's image, or already handled: the user gets the same answer for all three,
+    // Wrong ID, another org's image, uploading or already handled: the user gets the same answer for all,
     // so the message does not reveal whether an ID exists in another store.
     if (updated.length === 0) {
-      return { ok: false, error: "The image was not found or has already been handled." };
+      return { ok: false, error: "The image was not found, is being uploaded, or has already been handled." };
     }
   } catch (e) {
     // Details go to the server log only; the user gets a short message.
