@@ -34,7 +34,9 @@ export async function saveVisualToneOfVoice(
   const storeId = String(formData.get('storeId') ?? '');
   if (!/^\d+$/.test(storeId)) return { error: 'The visual tone of voice could not be saved. Try again.' };
 
-  const text = String(formData.get('visualToneOfVoice') ?? '').trim();
+  // Browsers submit textarea line breaks as \r\n. Store \n, as the field holds it, so the saved text
+  // matches the draft (the form compares them to show "Saved.").
+  const text = String(formData.get('visualToneOfVoice') ?? '').replace(/\r\n/g, '\n').trim();
   if (text.length > VISUAL_TONE_OF_VOICE_MAX_LENGTH) {
     return { error: `Keep the text under ${VISUAL_TONE_OF_VOICE_MAX_LENGTH} characters.` };
   }
