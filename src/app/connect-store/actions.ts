@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { getRequestOrigin } from '@/lib/request-origin';
 import { buildAuthorizeUrl, CALLBACK_PATH, REDIRECT_URLS, SHOP_DOMAIN_PATTERN } from '@/lib/shopify/oauth';
+import { ADMIN_ROLE } from '@/lib/roles';
 import { savePendingConnection } from './oauth-cookie';
 
 // The secret is never sent back to the browser, so the user has to type it again after an error.
@@ -18,8 +19,10 @@ export type ConnectStoreState = { error?: string; values?: ConnectStoreValues };
 const field = (formData: FormData, key: string) => String(formData.get(key) ?? '').trim();
 
 export async function connectStore(_prev: ConnectStoreState, formData: FormData): Promise<ConnectStoreState> {
-  const { orgId } = await auth();
+  const { orgId, has } = await auth();
   if (!orgId) return { error: 'Select an organization first.' };
+  // The page hides the form from members, but anyone can call a server action directly.
+  if (!has({ role: ADMIN_ROLE })) return { error: 'Only admins can connect a store.' };
 
   const values: ConnectStoreValues = {
     name: field(formData, 'name'),

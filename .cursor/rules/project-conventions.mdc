@@ -5,6 +5,7 @@ alwaysApply: false
 ---
 
 - All app text and code are in English: UI text, error messages, page titles, placeholders, code comments and SQL migration comments. The report and Jira stay in Danish.
+- Domain terms come from GLOSSARY.md in the repo root. Use its English names in code and UI, and never the words it says to avoid. A new term goes in GLOSSARY.md in the same PR.
 - Every new or touched file in src/ starts with a 1–2 line /** */ comment saying what the file does (after 'use client' / 'use server').
 - Files are kebab-case. Components use named exports; only files Next requires (page, layout, proxy …) use default export. Import with @/*. No barrel index.ts files.
 - Keep a file in the route folder that uses it; move it to components/ or lib/ only when a second page needs it.
