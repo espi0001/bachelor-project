@@ -48,7 +48,7 @@ export function StoreConnectionCard({ storeId, shopDomain, lastSyncedAt, canDisc
           <DisconnectStoreButton storeId={storeId} shopDomain={shopDomain} />
         </div>
       ) : (
-        <p className="pt-1 typography-body-sm text-muted dark:text-zinc-500">
+        <p className="pt-1 typography-body-sm text-secondary dark:text-zinc-400">
           Only admins can disconnect the store.
         </p>
       )}
