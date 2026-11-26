@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { clerkClient, type OrganizationMembership } from "@clerk/nextjs/server";
+import { ADMIN_ROLE } from "@/lib/roles";
 import { ManageButton } from "./manage-button";
 import { SettingsCard } from "./settings-card";
-import { ADMIN_ROLE } from "@/lib/roles";
 
 // Clerk returns 10 members by default; 500 is its maximum, so the card shows every member.
 const MEMBER_LIMIT = 500;

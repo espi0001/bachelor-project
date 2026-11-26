@@ -5,11 +5,11 @@ import { auth } from "@clerk/nextjs/server";
 import { getStoreForOrg } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { ConnectStorePrompt } from "@/components/connect-store-prompt";
+import { ADMIN_ROLE } from "@/lib/roles";
 import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
 import { SettingsCard } from "./settings-card";
 import { SettingsTabs } from "./settings-tabs";
-import { ADMIN_ROLE } from "@/lib/roles";
 
 export const metadata = {
   title: "Settings",

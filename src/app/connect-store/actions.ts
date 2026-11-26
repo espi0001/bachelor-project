@@ -9,8 +9,8 @@ import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { getRequestOrigin } from '@/lib/request-origin';
 import { buildAuthorizeUrl, CALLBACK_PATH, REDIRECT_URLS, SHOP_DOMAIN_PATTERN } from '@/lib/shopify/oauth';
-import { savePendingConnection } from './oauth-cookie';
 import { ADMIN_ROLE } from '@/lib/roles';
+import { savePendingConnection } from './oauth-cookie';
 
 // The secret is never sent back to the browser, so the user has to type it again after an error.
 export type ConnectStoreValues = { name: string; domain: string; clientId: string };

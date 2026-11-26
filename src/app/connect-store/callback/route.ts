@@ -9,8 +9,8 @@ import { sql } from '@/lib/db';
 import { encrypt } from '@/lib/crypto';
 import { forgetAccessToken } from '@/lib/shopify/client';
 import { exchangeCodeForToken, hasRequiredScopes, isValidCallbackHmac, SHOP_DOMAIN_PATTERN } from '@/lib/shopify/oauth';
-import { takePendingConnection, type PendingConnection } from '../oauth-cookie';
 import { ADMIN_ROLE } from '@/lib/roles';
+import { takePendingConnection, type PendingConnection } from '../oauth-cookie';
 
 // Error codes are turned into messages on /connect-store (see page.tsx).
 type ErrorCode = 'expired' | 'org_changed' | 'not_admin' | 'invalid' | 'exchange' | 'scopes' | 'org_has_store' | 'store_taken';

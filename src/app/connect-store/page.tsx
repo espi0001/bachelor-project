@@ -8,8 +8,8 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { REDIRECT_URLS } from '@/lib/shopify/oauth';
-import { ConnectStoreWizard } from './connect-store-wizard';
 import { ADMIN_ROLE } from '@/lib/roles';
+import { ConnectStoreWizard } from './connect-store-wizard';
 
 export const metadata = {
   title: 'Connect store',
@@ -30,7 +30,7 @@ const CALLBACK_ERRORS: Record<string, string> = {
 export default function ConnectStorePage({ searchParams }: PageProps<'/connect-store'>) {
   return (
     <div className="flex justify-center">
-      <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
+      <Suspense fallback={<p className="typography-body-sm text-secondary dark:text-zinc-400">Loading…</p>}>
         <ConnectStoreGate searchParams={searchParams} />
       </Suspense>
     </div>
@@ -43,7 +43,7 @@ async function ConnectStoreGate({ searchParams }: Pick<PageProps<'/connect-store
 
   const { orgId, has } = await auth();
   if (!orgId) {
-    return <p className="text-zinc-500">Select an organization first.</p>;
+    return <p className="typography-body-sm text-secondary dark:text-zinc-400">Select an organization first.</p>;
   }
 
   const { error, reconnect } = await searchParams;
@@ -56,7 +56,7 @@ async function ConnectStoreGate({ searchParams }: Pick<PageProps<'/connect-store
 
   // Members reach this page from the connect-store card and the reconnect links, so explain instead of redirecting.
   if (!has({ role: ADMIN_ROLE })) {
-    return <p className="text-zinc-500">Only admins can connect a store. Ask an admin in your organization to do it.</p>;
+    return <p className="typography-body-sm text-secondary dark:text-zinc-400">Only admins can connect a store. Ask an admin in your organization to do it.</p>;
   }
 
   // Object.hasOwn: only our own codes, not inherited keys such as "constructor".
