@@ -29,18 +29,10 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - **Er ticketen større end 1–2 dages arbejde: stop.** Foreslå at dele den op i vertikale stykker med `jira-ticket-tjek`.
 - Er det en epic, så list under-tickets og spørg, hvilken der skal laves.
 
-### 2. Foreslå et branch-navn
-Brugeren laver selv branchen og står selv for commit, push og PR. Gør aldrig noget af det selv: foreslå kun navnet.
-
-Format: `<prefix>/BA-<nr>-<kort-beskrivelse>`
-
-| Type | Prefix | Eksempel |
-|---|---|---|
-| Ny funktion | `feature/` | `feature/BA-139-clerk-login-flow` |
-| Fejl | `fix/` | `fix/BA-140-upload-fejlbesked` |
-| Opsætning, opdateringer | `chore/` | `chore/BA-110-eslint-config` |
-
-Beskrivelsen er højst 6 ord i kebab-case.
+### 2. Find branch-navnet
+Brugeren laver selv branchen og står selv for commit, push og PR. Gør aldrig noget af det selv.
+- Brug navnet fra ticketens felt **Branch:**.
+- Mangler det, så foreslå et efter formatet i `jira-ticket-tjek` (Tjekliste → Branch), og tilbyd at skrive det i ticketen.
 
 ### 3. Plan
 Læs de relevante filer først. Vis så:

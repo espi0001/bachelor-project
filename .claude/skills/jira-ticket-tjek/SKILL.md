@@ -1,6 +1,6 @@
 ---
 name: jira-ticket-tjek
-description: Opret, opdel eller tjek Jira-tickets til kodeopgaver i BA: find eksisterende ticket først, del store opgaver i vertikale stykker med blokeringer, og sørg for beskrivelse, acceptkriterier, ansvarlig, epic, startdato og deadline. Use when code work needs a ticket, a feature or plan must be split into tickets, or tickets in BA need checking.
+description: Opret, opdel eller tjek Jira-tickets til kodeopgaver i BA: find eksisterende ticket først, del store opgaver i vertikale stykker med blokeringer, og sørg for beskrivelse, acceptkriterier, ansvarlig, epic, startdato, deadline og branch-navn. Use when code work needs a ticket, a feature or plan must be split into tickets, or tickets in BA need checking.
 ---
 
 # Jira-ticket-tjek (BA)
@@ -50,6 +50,15 @@ Bruges, når en opgave er større end 1–2 dages arbejde, eller når en plan, e
 - **Epic:** altid linket til den rigtige epic. Kode hører normalt under BA-8 "Develop 2: Udvikling". Find epics med `project = BA AND issuetype = Epic`.
 - **Startdato og deadline:** altid sat (felterne Start date og Due date). Datoerne tages fra "Ugeplan" eller "Plan" i Drive. Står de der ikke, så skriv 🟡 **[Claude] Afklar:** og spørg. Find aldrig selv på datoer.
 - **Blokeret?** Venter ticketen på en anden ticket, så link dem med Jiras "is blocked by", hvis værktøjet kan, og skriv det også i "Blokeret af". Mangler der noget uden for Jira (design, data, svar fra Instant), så står det i ticketen.
+- **Branch:** hver ticket har et forslag til branch-navn i feltet **Branch:**, så hele gruppen bruger samme navn. Mangler det, så foreslå et.
+  - Format: `<prefix>/BA-<nr>-<kort-beskrivelse>`. Beskrivelsen er højst 6 ord på engelsk i kebab-case, ligesom koden.
+  - Prefix efter type:
+
+    | Type | Prefix | Eksempel |
+    |---|---|---|
+    | Ny funktion | `feature/` | `feature/BA-139-clerk-login-flow` |
+    | Fejl | `fix/` | `fix/BA-140-upload-error-message` |
+    | Opsætning, opdateringer, docs | `chore/` | `chore/BA-110-eslint-config` |
 
 ## Skabelon
 ```
@@ -58,6 +67,7 @@ Bruges, når en opgave er større end 1–2 dages arbejde, eller når en plan, e
 **Links:** Figma / krav-ID / mødeopsummering
 **Epic:** BA-…
 **Start:** dd/mm · **Deadline:** dd/mm
+**Branch:** `feature/BA-…-…`
 
 **Acceptkriterier**
 - [ ] …
