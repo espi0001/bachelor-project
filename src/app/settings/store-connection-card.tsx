@@ -1,4 +1,4 @@
-/** Settings card that shows which Shopify store the organization is connected to, with a button to disconnect it. */
+/** Settings card that shows which Shopify store the organization is connected to, with a button to disconnect it (admins only). */
 
 import { Badge } from "@/components/ui/badge";
 import { DisconnectStoreButton } from "./disconnect-store-button";
@@ -15,9 +15,11 @@ type StoreConnectionCardProps = {
   storeId: string;
   shopDomain: string;
   lastSyncedAt: Date | null;
+  /** True for org admins. Checked on the server; the action checks it again. */
+  canDisconnect: boolean;
 };
 
-export function StoreConnectionCard({ storeId, shopDomain, lastSyncedAt }: StoreConnectionCardProps) {
+export function StoreConnectionCard({ storeId, shopDomain, lastSyncedAt, canDisconnect }: StoreConnectionCardProps) {
   const rows = [
     { label: "Store", value: shopDomain },
     { label: "Platform", value: "Shopify" },
@@ -41,9 +43,15 @@ export function StoreConnectionCard({ storeId, shopDomain, lastSyncedAt }: Store
           </div>
         ))}
       </dl>
-      <div className="flex flex-wrap gap-2 pt-1">
-        <DisconnectStoreButton storeId={storeId} shopDomain={shopDomain} />
-      </div>
+      {canDisconnect ? (
+        <div className="flex flex-wrap gap-2 pt-1">
+          <DisconnectStoreButton storeId={storeId} shopDomain={shopDomain} />
+        </div>
+      ) : (
+        <p className="pt-1 typography-body-sm text-muted dark:text-zinc-500">
+          Only admins can disconnect the store.
+        </p>
+      )}
     </SettingsCard>
   );
 }

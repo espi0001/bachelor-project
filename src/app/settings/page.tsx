@@ -9,6 +9,7 @@ import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
 import { SettingsCard } from "./settings-card";
 import { SettingsTabs } from "./settings-tabs";
+import { ADMIN_ROLE } from "@/lib/roles";
 
 export const metadata = {
   title: "Settings",
@@ -30,7 +31,7 @@ export default function SettingsPage() {
 
 // auth() and the DB read are per request, so they must render inside Suspense (cacheComponents).
 async function SettingsContent() {
-  const { orgId } = await auth.protect();
+  const { orgId, has } = await auth.protect();
   if (!orgId) {
     return <p className="text-secondary dark:text-zinc-400">Select an organization first.</p>;
   }
@@ -49,6 +50,7 @@ async function SettingsContent() {
               storeId={store.id}
               shopDomain={store.shopify_domain}
               lastSyncedAt={store.last_synced_at}
+              canDisconnect={has({ role: ADMIN_ROLE })}
             />
           ) : (
             <ConnectStorePrompt />

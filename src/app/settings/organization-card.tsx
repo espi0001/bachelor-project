@@ -4,13 +4,14 @@ import Image from "next/image";
 import { clerkClient, type OrganizationMembership } from "@clerk/nextjs/server";
 import { ManageButton } from "./manage-button";
 import { SettingsCard } from "./settings-card";
+import { ADMIN_ROLE } from "@/lib/roles";
 
 // Clerk returns 10 members by default; 500 is its maximum, so the card shows every member.
 const MEMBER_LIMIT = 500;
 
 // Clerk's default roles. Figma's Owner / Editor / Viewer do not exist in Clerk.
 const ROLE_LABELS: Record<string, string> = {
-  "org:admin": "Admin",
+  [ADMIN_ROLE]: "Admin",
   "org:member": "Member",
 };
 

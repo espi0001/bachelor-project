@@ -10,9 +10,10 @@ import { encrypt } from '@/lib/crypto';
 import { forgetAccessToken } from '@/lib/shopify/client';
 import { exchangeCodeForToken, hasRequiredScopes, isValidCallbackHmac, SHOP_DOMAIN_PATTERN } from '@/lib/shopify/oauth';
 import { takePendingConnection, type PendingConnection } from '../oauth-cookie';
+import { ADMIN_ROLE } from '@/lib/roles';
 
 // Error codes are turned into messages on /connect-store (see page.tsx).
-type ErrorCode = 'expired' | 'org_changed' | 'invalid' | 'exchange' | 'scopes' | 'org_has_store' | 'store_taken';
+type ErrorCode = 'expired' | 'org_changed' | 'not_admin' | 'invalid' | 'exchange' | 'scopes' | 'org_has_store' | 'store_taken';
 
 export async function GET(request: Request) {
   const pending = await takePendingConnection();
@@ -29,8 +30,10 @@ export async function GET(request: Request) {
 }
 
 async function handleCallback(params: URLSearchParams, pending: PendingConnection): Promise<'ok' | ErrorCode> {
-  const { orgId } = await auth();
+  const { orgId, has } = await auth();
   if (orgId !== pending.orgId) return 'org_changed';
+  // Checked again here: the user's role can change while they are on Shopify.
+  if (!has({ role: ADMIN_ROLE })) return 'not_admin';
 
   // state: the request belongs to the attempt this browser started (CSRF).
   // shop: Shopify answered for the store the user typed.
