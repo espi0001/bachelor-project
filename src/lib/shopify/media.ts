@@ -6,23 +6,20 @@
 import "server-only";
 import { shopifyAdminFetch } from "./client";
 
-// productCreateMedia is deprecated in 2026-10 ("Use productUpdate or productSet instead").
-// productUpdate with `media` adds to the product's images; productSet would replace the whole list.
-// It needs only write_products, which the app already has. fileCreate would also need write_files,
-// and every store would have to reconnect to grant it.
+// productCreateMedia is deprecated in 2026-10 ("Use productUpdate or productSet instead"), but it is the only
+// option that returns the exact media it created while needing only write_products:
+// - productUpdate with `media` does not return the new media, so we would have to guess it (e.g. the newest),
+//   and could then wait for, record or even delete an image someone else added at the same moment.
+// - productSet replaces the product's whole list of images.
+// - fileCreate returns the exact ID, but needs write_files, and every store would have to reconnect to grant it.
+// When a later API version removes productCreateMedia, switch to fileCreate + fileUpdate(referencesToAdd).
 const ADD_PRODUCT_IMAGE_MUTATION = /* GraphQL */ `
-  mutation AddProductImage($product: ProductUpdateInput!, $media: [CreateMediaInput!]) {
-    productUpdate(product: $product, media: $media) {
-      product {
-        # productUpdate does not return the media it created, so ask for the newest one instead.
-        # Sorted by ID, not position, so it still works if the merchant has reordered the images.
-        media(first: 1, sortKey: ID, reverse: true) {
-          nodes {
-            id
-          }
-        }
+  mutation AddProductImage($productId: ID!, $media: [CreateMediaInput!]!) {
+    productCreateMedia(productId: $productId, media: $media) {
+      media {
+        id
       }
-      userErrors {
+      mediaUserErrors {
         field
         message
       }
@@ -31,13 +28,13 @@ const ADD_PRODUCT_IMAGE_MUTATION = /* GraphQL */ `
 `;
 
 type AddProductImageResult = {
-  productUpdate: {
-    product: { media: { nodes: { id: string }[] } } | null;
-    userErrors: { field: string[] | null; message: string }[];
+  productCreateMedia: {
+    media: { id: string }[] | null;
+    mediaUserErrors: { field: string[] | null; message: string }[];
   };
 };
 
-// Shopify downloads and processes the image after productUpdate returns. Processing a few MB usually
+// Shopify downloads and processes the image after productCreateMedia returns. Processing a few MB usually
 // takes a few seconds; after this long we give up rather than keep the user waiting.
 const STATUS_POLL_INTERVAL_MS = 2000;
 const STATUS_POLL_ATTEMPTS = 10;
@@ -110,18 +107,18 @@ export async function addProductImage(
   }
 
   const data = await shopifyAdminFetch<AddProductImageResult>(shopDomain, ADD_PRODUCT_IMAGE_MUTATION, {
-    product: { id: productId },
+    productId,
     media: [{ originalSource: imageUrl, alt, mediaContentType: "IMAGE" }],
   });
 
   // Shopify reports problems with the input here with HTTP 200, so shopifyAdminFetch does not throw for them.
-  const { product, userErrors } = data.productUpdate;
-  if (userErrors.length > 0) {
-    throw new Error(`Shopify rejected the image: ${userErrors.map((e) => e.message).join("; ")}`);
+  const { media, mediaUserErrors } = data.productCreateMedia;
+  if (mediaUserErrors.length > 0) {
+    throw new Error(`Shopify rejected the image: ${mediaUserErrors.map((e) => e.message).join("; ")}`);
   }
 
-  // Known limit: if two images are added to the same product at the same moment, this may return the other one.
-  const mediaId = product?.media.nodes[0]?.id;
+  // One image was sent, so the one returned is exactly the one this call created.
+  const mediaId = media?.[0]?.id;
   if (!mediaId) throw new Error(`Shopify added no image to ${productId}`);
 
   // The mutation only means Shopify received the request. The image is not usable until it is READY.
