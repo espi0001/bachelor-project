@@ -8,11 +8,13 @@ import { saveVisualToneOfVoice, type SaveVisualToneOfVoiceState } from "./action
 import { VISUAL_TONE_OF_VOICE_MAX_LENGTH, VISUAL_TONE_OF_VOICE_TEMPLATE } from "./visual-tone-of-voice";
 
 type VisualToneOfVoiceFormProps = {
+  /** The store the form is shown for, so a save never lands on a store connected since. */
+  storeId: string;
   /** The saved text, or `null` when the store has none yet. */
   initialText: string | null;
 };
 
-export function VisualToneOfVoiceForm({ initialText }: VisualToneOfVoiceFormProps) {
+export function VisualToneOfVoiceForm({ storeId, initialText }: VisualToneOfVoiceFormProps) {
   const [state, formAction, isPending] = useActionState<SaveVisualToneOfVoiceState, FormData>(
     saveVisualToneOfVoice,
     {},
@@ -20,9 +22,12 @@ export function VisualToneOfVoiceForm({ initialText }: VisualToneOfVoiceFormProp
   // Controlled on purpose: React resets an uncontrolled form after its action runs, which would put the
   // old saved text back in the field. Also drives the character count.
   const [text, setText] = useState(initialText ?? "");
+  // Only while the field still holds what was saved. Editing after a save, or during one, hides it again.
+  const isSaved = !isPending && state.savedText !== undefined && state.savedText === text.trim();
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
+      <input type="hidden" name="storeId" value={storeId} />
       <div className="flex flex-col gap-1">
         <label htmlFor="visual-tone-of-voice" className="typography-label text-primary dark:text-zinc-100">
           Visual tone of voice
@@ -50,7 +55,7 @@ export function VisualToneOfVoiceForm({ initialText }: VisualToneOfVoiceFormProp
       <div aria-live="polite">
         {state.error ? (
           <ErrorMessage>{state.error}</ErrorMessage>
-        ) : state.saved && !isPending ? (
+        ) : isSaved ? (
           <p className="typography-body-sm text-success dark:text-green-400">Saved.</p>
         ) : null}
       </div>

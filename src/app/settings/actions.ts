@@ -11,7 +11,11 @@ import { VISUAL_TONE_OF_VOICE_MAX_LENGTH } from './visual-tone-of-voice';
 
 export type DisconnectStoreState = { error?: string };
 
-export type SaveVisualToneOfVoiceState = { error?: string; saved?: boolean };
+export type SaveVisualToneOfVoiceState = {
+  error?: string;
+  /** The text as saved (trimmed, '' when cleared), so the form can tell whether the draft is still saved. */
+  savedText?: string;
+};
 
 /**
  * Saves the visual tone of voice on the organization's store. An empty text clears it, and generation
@@ -25,6 +29,11 @@ export async function saveVisualToneOfVoice(
   const { orgId } = await auth();
   if (!orgId) return { error: 'Select an organization first.' };
 
+  // The id of the store the form was shown for. Without it, a form left open while the store was
+  // replaced (another tab or member) would save onto the new store. auth_org_id still decides access.
+  const storeId = String(formData.get('storeId') ?? '');
+  if (!/^\d+$/.test(storeId)) return { error: 'The visual tone of voice could not be saved. Try again.' };
+
   const text = String(formData.get('visualToneOfVoice') ?? '').trim();
   if (text.length > VISUAL_TONE_OF_VOICE_MAX_LENGTH) {
     return { error: `Keep the text under ${VISUAL_TONE_OF_VOICE_MAX_LENGTH} characters.` };
@@ -33,16 +42,18 @@ export async function saveVisualToneOfVoice(
   try {
     const updated = await sql`
       UPDATE store SET visual_tone_of_voice = ${text || null}
-      WHERE auth_org_id = ${orgId}
+      WHERE id = ${storeId} AND auth_org_id = ${orgId}
       RETURNING id
     `;
-    if (updated.length === 0) return { error: 'Connect a store before you save a visual tone of voice.' };
+    if (updated.length === 0) {
+      return { error: 'This store is no longer connected. Reload the page to see the current store.' };
+    }
   } catch (e) {
     console.error('Failed to save visual tone of voice', e);
     return { error: 'The visual tone of voice could not be saved. Try again.' };
   }
 
-  return { saved: true };
+  return { savedText: text };
 }
 
 /**

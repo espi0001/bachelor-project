@@ -68,7 +68,7 @@ async function SettingsContent() {
             >
               {/* The text is saved on the store row, so it needs a connected store. */}
               {store ? (
-                <VisualToneOfVoiceForm initialText={store.visual_tone_of_voice} />
+                <VisualToneOfVoiceForm storeId={store.id} initialText={store.visual_tone_of_voice} />
               ) : (
                 <ConnectStorePrompt description="Connect a store to set its visual tone of voice" />
               )}
