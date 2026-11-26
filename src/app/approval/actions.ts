@@ -9,7 +9,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 import { IMAGE_TYPE_LABELS, isImageType } from "@/lib/image-types";
 import { ShopifyAuthError } from "@/lib/shopify/client";
-import { addProductImage } from "@/lib/shopify/media";
+import { addProductImage, removeProductImage } from "@/lib/shopify/media";
 import { getProductTitles } from "@/lib/shopify/products";
 import { createSignedImageUrls } from "@/lib/supabase/storage";
 import { UPLOAD_TIMEOUT } from "./upload-timeout";
@@ -129,9 +129,15 @@ export async function retryUpload(imageIdFromBrowser: string): Promise<ApprovalR
  * If the upload fails, the mark is removed again, so the image can be retried or rejected straight away.
  */
 async function uploadToShopify(imageId: string, orgId: string, image: ImageToUpload): Promise<ApprovalResult> {
-  const result = await tryUpload(imageId, orgId, image);
-  if (!result.ok) await releaseUpload(imageId, orgId);
-  return result;
+  // 1. Upload. If it fails, nothing is in Shopify, so the image can be retried or rejected straight away.
+  const sent = await sendToShopify(imageId, image);
+  if (!sent.ok) {
+    await releaseUpload(imageId, orgId);
+    return sent;
+  }
+
+  // 2. Record the upload.
+  return recordUpload(imageId, orgId, image, sent.mediaId);
 }
 
 /** Removes the "upload started" mark. If that fails, the image becomes retryable after UPLOAD_TIMEOUT instead. */
@@ -150,9 +156,11 @@ async function releaseUpload(imageId: string, orgId: string): Promise<void> {
   }
 }
 
-async function tryUpload(imageId: string, orgId: string, image: ImageToUpload): Promise<ApprovalResult> {
-  // 1. Upload.
-  let mediaId: string;
+/** Adds the image to its product in Shopify. Returns the new media ID, or the error to show. */
+async function sendToShopify(
+  imageId: string,
+  image: ImageToUpload,
+): Promise<{ ok: true; mediaId: string } | Extract<ApprovalResult, { ok: false }>> {
   try {
     const titles = await getProductTitles(image.shopify_domain, [image.shopify_product_id]);
     const title = titles.get(image.shopify_product_id);
@@ -164,12 +172,13 @@ async function tryUpload(imageId: string, orgId: string, image: ImageToUpload): 
 
     // BA-153: the alt text says the image is AI-generated, so shoppers and screen reader users can tell.
     const typeLabel = isImageType(image.type) ? IMAGE_TYPE_LABELS[image.type] : image.type;
-    mediaId = await addProductImage(
+    const mediaId = await addProductImage(
       image.shopify_domain,
       image.shopify_product_id,
       url,
       `${typeLabel} of ${title}. Generated with AI.`,
     );
+    return { ok: true, mediaId };
   } catch (e) {
     console.error(`Uploading image ${imageId} to Shopify failed:`, e);
     if (e instanceof ShopifyAuthError) {
@@ -181,8 +190,18 @@ async function tryUpload(imageId: string, orgId: string, image: ImageToUpload): 
     }
     return { ok: false, error: "Approved, but the upload to Shopify failed.", uploadFailed: true };
   }
+}
 
-  // 2. Record the upload.
+/**
+ * Saves the media ID of an image that is now in Shopify. If saving fails, the image is removed from Shopify again,
+ * so the database ("not in Shopify, can be retried") is true and a retry cannot add it twice.
+ */
+async function recordUpload(
+  imageId: string,
+  orgId: string,
+  image: ImageToUpload,
+  mediaId: string,
+): Promise<ApprovalResult> {
   try {
     const updated = await sql`
       UPDATE generated_image gi
@@ -194,19 +213,34 @@ async function tryUpload(imageId: string, orgId: string, image: ImageToUpload): 
     `;
     // Should not happen, since the caller claimed this row. Treated like a failed save rather than ignored.
     if (updated.count === 0) throw new Error(`No row matched image ${imageId} in org ${orgId}`);
+    return { ok: true };
   } catch (e) {
-    // The image is in Shopify, but the database does not know. A retry would add it twice.
     console.error(`Image ${imageId} is in Shopify as ${mediaId}, but saving that failed:`, e);
-    // Still reported as a failed upload: the row has no media ID, so /approval shows it with Retry too.
+  }
+
+  try {
+    await removeProductImage(image.shopify_domain, image.shopify_product_id, mediaId);
+  } catch (e) {
+    // Now Shopify has an image the database does not know about. Keep the "upload started" mark, so Retry and
+    // Reject stay blocked until UPLOAD_TIMEOUT has passed, giving someone time to remove it by hand.
+    console.error(
+      `Could not remove ${mediaId} from ${image.shopify_product_id} either. Remove it in Shopify admin before retrying image ${imageId}:`,
+      e,
+    );
     return {
       ok: false,
-      error: "The image was uploaded, but saving that failed. Check Shopify before retrying.",
+      error: "The image is in Shopify, but saving that failed. Remove it in Shopify admin before retrying.",
       uploadFailed: true,
     };
   }
 
-  // The callers refresh the page, whatever the result.
-  return { ok: true };
+  // Back to "approved, not in Shopify", which is now true, so it can be retried straight away.
+  await releaseUpload(imageId, orgId);
+  return {
+    ok: false,
+    error: "The upload could not be saved, so it was removed from Shopify again. Try again.",
+    uploadFailed: true,
+  };
 }
 
 /**

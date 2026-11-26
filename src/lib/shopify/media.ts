@@ -1,5 +1,6 @@
 /**
- * Adds images to products in a Shopify store via the Admin API, and waits until Shopify has processed them.
+ * Adds images to products in a Shopify store via the Admin API and waits until Shopify has processed them,
+ * or removes them again.
  */
 
 import "server-only";
@@ -128,7 +129,7 @@ export async function addProductImage(
     await waitUntilReady(shopDomain, mediaId);
   } catch (e) {
     try {
-      await deleteProductMedia(shopDomain, productId, mediaId);
+      await removeProductImage(shopDomain, productId, mediaId);
     } catch (deleteError) {
       console.error(`Could not remove the failed image ${mediaId} from ${productId}. Remove it in Shopify admin:`, deleteError);
     }
@@ -155,8 +156,8 @@ async function waitUntilReady(shopDomain: string, mediaId: string): Promise<void
   throw new Error(`Shopify had not finished processing ${mediaId} after ${seconds} seconds`);
 }
 
-/** Removes one media item from a product. Throws if Shopify refuses. */
-async function deleteProductMedia(shopDomain: string, productId: string, mediaId: string): Promise<void> {
+/** Removes one image from a product, e.g. one added by addProductImage. Throws if Shopify refuses. */
+export async function removeProductImage(shopDomain: string, productId: string, mediaId: string): Promise<void> {
   const data = await shopifyAdminFetch<DeleteProductMediaResult>(shopDomain, DELETE_PRODUCT_MEDIA_MUTATION, {
     productId,
     mediaIds: [mediaId],
