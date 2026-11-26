@@ -23,7 +23,7 @@ export function NavItem({ href, icon, label, isActive, onClick }: NavItemProps) 
       href={href}
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
-      className={`flex w-full items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:focus-visible:outline-blue-400 ${STATE_CLASSES[isActive ? "active" : "default"]}`}
+      className={`flex w-full items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2.5 focus-ring ${STATE_CLASSES[isActive ? "active" : "default"]}`}
     >
       {/* Only the active icon is brand blue in Figma; the default icon follows the text colour. */}
       <Icon name={icon} size="xs" className={isActive ? "text-brand dark:text-blue-400" : undefined} />

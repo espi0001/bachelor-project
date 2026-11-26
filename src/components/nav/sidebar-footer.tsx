@@ -9,7 +9,7 @@ const SWITCHER_APPEARANCE = {
   elements: {
     rootBox: "min-w-0",
     organizationSwitcherTrigger:
-      "gap-2.5 rounded-md py-1 pl-0 pr-1 typography-body-sm text-secondary hover:bg-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:text-zinc-400",
+      "gap-2.5 rounded-md py-1 pl-0 pr-1 typography-body-sm text-secondary hover:bg-subtle focus-ring dark:text-zinc-400",
     organizationPreviewAvatarBox: "size-5 rounded-sm bg-brand",
     organizationPreviewMainIdentifier: "typography-body-sm text-secondary dark:text-zinc-400",
     organizationSwitcherTriggerIcon: "size-3 text-secondary",

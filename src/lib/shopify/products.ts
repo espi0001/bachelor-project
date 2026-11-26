@@ -1,5 +1,5 @@
 /**
- * Fetches products and their images from a Shopify store via the Admin API: all products, or one by ID.
+ * Fetches products from a Shopify store via the Admin API: all products, one by ID, or the titles of several.
  */
 
 import "server-only";
@@ -170,4 +170,43 @@ export async function getProduct(shopDomain: string, productId: string): Promise
     imagesFirst: IMAGES_PER_PRODUCT,
   });
   return data.product ? toProduct(data.product) : null;
+}
+
+// Shopify's nodes(ids:) accepts at most 250 IDs per query.
+const NODES_PAGE_SIZE = 250;
+
+const PRODUCT_TITLES_QUERY = /* GraphQL */ `
+  query ProductTitles($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        title
+      }
+    }
+  }
+`;
+
+type ProductTitlesQueryResult = {
+  // null for an ID that no longer exists in the store; an empty object for an ID that is not a product.
+  nodes: ({ id?: string; title?: string } | null)[];
+};
+
+/**
+ * Fetches the titles of several products in as few requests as possible.
+ * Returns a map from product ID to title. A product that was deleted in Shopify is left out of the map.
+ */
+export async function getProductTitles(shopDomain: string, productIds: string[]): Promise<Map<string, string>> {
+  const titles = new Map<string, string>();
+  const ids = [...new Set(productIds)];
+
+  for (let i = 0; i < ids.length; i += NODES_PAGE_SIZE) {
+    const data = await shopifyAdminFetch<ProductTitlesQueryResult>(shopDomain, PRODUCT_TITLES_QUERY, {
+      ids: ids.slice(i, i + NODES_PAGE_SIZE),
+    });
+    for (const node of data.nodes) {
+      if (node?.id && node.title !== undefined) titles.set(node.id, node.title);
+    }
+  }
+
+  return titles;
 }

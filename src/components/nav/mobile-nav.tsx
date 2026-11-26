@@ -10,7 +10,7 @@ import { NAV_ITEMS, isActivePath } from "./sidebar";
 import { SidebarFooter } from "./sidebar-footer";
 
 const ICON_BUTTON_CLASS =
-  "flex cursor-pointer items-center justify-center rounded-md p-1.5 text-secondary hover:bg-subtle hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-instant-blue dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-100 dark:focus-visible:outline-blue-400";
+  "flex cursor-pointer items-center justify-center rounded-md p-1.5 text-secondary hover:bg-subtle hover:text-primary focus-ring dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-100";
 
 // Tailwind's md breakpoint, where the sidebar takes over from the mobile nav.
 const DESKTOP_MEDIA_QUERY = "(min-width: 48rem)";
