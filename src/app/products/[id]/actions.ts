@@ -8,7 +8,8 @@ import { randomUUID } from "node:crypto";
 import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 import { isImageType, type ImageType } from "@/lib/image-types";
-import { generatePackshot } from "@/lib/photoroom/generate";
+import { generateLifestyleImage, generatePackshot } from "@/lib/photoroom/generate";
+import type { PhotoroomResult } from "@/lib/photoroom/client";
 import { getProduct, productIdFromUrl, productUrlId } from "@/lib/shopify/products";
 import {
   createSignedImageUrls,
@@ -28,8 +29,12 @@ export type GenerateImageResult =
     }
   | { ok: false; error: string };
 
-const generators: Record<ImageType, (imageUrl: string) => ReturnType<typeof generatePackshot>> = {
+type Generator = (imageUrl: string, visualToneOfVoice: string | null) => Promise<PhotoroomResult>;
+
+// Only lifestyle images use the visual tone of voice. A packshot must look neutral, whatever the store's style.
+const generators: Record<ImageType, Generator> = {
   packshot: generatePackshot,
+  lifestyleImage: generateLifestyleImage,
 };
 
 /** File extension per content type. Matches allowed_mime_types on the "generated-images" bucket. */
@@ -62,8 +67,8 @@ export async function generateImage(
     const { orgId } = await auth();
     if (!orgId) return { ok: false, error: "Select an organization first." };
 
-    const [store] = await sql<{ id: string; shopify_domain: string }[]>`
-      SELECT id, shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+    const [store] = await sql<{ id: string; shopify_domain: string; visual_tone_of_voice: string | null }[]>`
+      SELECT id, shopify_domain, visual_tone_of_voice FROM store WHERE auth_org_id = ${orgId} LIMIT 1
     `;
     if (!store) return { ok: false, error: "No store connected." };
 
@@ -76,7 +81,7 @@ export async function generateImage(
     sourceImageUrl = source.url;
 
     // 4. Generate.
-    const result = await generators[type](source.url);
+    const result = await generators[type](source.url, store.visual_tone_of_voice);
 
     // 5. Save the file. The path starts with the store, and the random name means it cannot be guessed.
     // A content type can carry extra parameters (e.g. "image/png; charset=binary"); only the first part counts.

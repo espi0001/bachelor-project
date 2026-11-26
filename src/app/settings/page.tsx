@@ -10,6 +10,7 @@ import { StoreConnectionCard } from "./store-connection-card";
 import { OrganizationCard } from "./organization-card";
 import { SettingsCard } from "./settings-card";
 import { SettingsTabs } from "./settings-tabs";
+import { VisualToneOfVoiceForm } from "./visual-tone-of-voice-form";
 
 export const metadata = {
   title: "Settings",
@@ -60,13 +61,17 @@ async function SettingsContent() {
         {
           id: "visual-tone-of-voice",
           label: "Visual tone of voice",
-          // Placeholder until the style from a reference image is built (BA-148).
           content: (
             <SettingsCard
               title="Visual tone of voice"
-              description="Upload a reference image, and AI turns its light, colours and mood into a style for your AI images."
+              description="How your lifestyle images should look. It is sent with every lifestyle image you generate."
             >
-              <p className="typography-body-sm text-muted dark:text-zinc-500">Coming soon.</p>
+              {/* The text is saved on the store row, so it needs a connected store. */}
+              {store ? (
+                <VisualToneOfVoiceForm initialText={store.visual_tone_of_voice} />
+              ) : (
+                <ConnectStorePrompt description="Connect a store to set its visual tone of voice" />
+              )}
             </SettingsCard>
           ),
         },
