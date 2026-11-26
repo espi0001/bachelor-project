@@ -3,6 +3,7 @@
 
 import { useActionState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { disconnectStore, type DisconnectStoreState } from "./actions";
 
 type DisconnectStoreButtonProps = {
@@ -34,14 +35,15 @@ export function DisconnectStoreButton({ storeId, shopDomain }: DisconnectStoreBu
           Disconnect {shopDomain}?
         </h2>
         <p id="disconnect-dialog-description" className="mt-2 typography-body-sm text-secondary dark:text-zinc-400">
-          The store and its generated images are removed from Instant Image. Nothing is changed in Shopify. You can
-          connect the store again later.
+          The store, its generated images and its visual tone of voice are removed from Instant Image. Nothing is
+          changed in Shopify. You can connect the store again later, but you will have to write the visual tone of
+          voice again.
         </p>
 
         {state.error ? (
-          <p role="alert" className="mt-4 rounded-md bg-error px-3 py-2 typography-body-sm text-error">
-            {state.error}
-          </p>
+          <div className="mt-4">
+            <ErrorMessage>{state.error}</ErrorMessage>
+          </div>
         ) : null}
 
         <form action={formAction} className="mt-6 flex justify-end gap-3">

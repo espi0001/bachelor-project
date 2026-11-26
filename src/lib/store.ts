@@ -9,6 +9,8 @@ export type Store = {
   name: string;
   shopify_domain: string;
   last_synced_at: Date | null;
+  /** How the store's lifestyle images should look. `null` until the store writes one. */
+  visual_tone_of_voice: string | null;
 };
 
 /**
@@ -17,7 +19,7 @@ export type Store = {
  */
 export async function getStoreForOrg(orgId: string): Promise<Store | undefined> {
   const [store] = await sql<Store[]>`
-    SELECT id, name, shopify_domain, last_synced_at FROM store WHERE auth_org_id = ${orgId} LIMIT 1
+    SELECT id, name, shopify_domain, last_synced_at, visual_tone_of_voice FROM store WHERE auth_org_id = ${orgId} LIMIT 1
   `;
   return store;
 }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { clerkClient, type OrganizationMembership } from "@clerk/nextjs/server";
 import { ADMIN_ROLE } from "@/lib/roles";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { ManageButton } from "./manage-button";
 import { SettingsCard } from "./settings-card";
 
@@ -69,9 +70,7 @@ export async function OrganizationCard({ orgId }: OrganizationCardProps) {
   return (
     <SettingsCard title="Organization" description="Members of your organization and their roles.">
       {members === null ? (
-        <p role="alert" className="rounded-md bg-error px-3 py-2 typography-body-sm text-error">
-          Could not load the members. Try reloading the page.
-        </p>
+        <ErrorMessage>Could not load the members. Try reloading the page.</ErrorMessage>
       ) : (
         <ul>
           {members.map((member) => (
