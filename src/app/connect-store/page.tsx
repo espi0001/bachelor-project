@@ -26,11 +26,11 @@ const CALLBACK_ERRORS: Record<string, string> = {
 
 export default function ConnectStorePage({ searchParams }: PageProps<'/connect-store'>) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="flex justify-center">
       <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
         <ConnectStoreGate searchParams={searchParams} />
       </Suspense>
-    </main>
+    </div>
   );
 }
 

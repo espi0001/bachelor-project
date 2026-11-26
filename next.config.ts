@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
         hostname: "cdn.shopify.com",
         pathname: "/s/files/**",
       },
+      // Profile pictures of organization members (Settings → Team)
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
     ],
   },
   turbopack: {

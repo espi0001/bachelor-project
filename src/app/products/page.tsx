@@ -5,7 +5,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/db";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
+import { getStoreForOrg } from "@/lib/store";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProducts } from "@/lib/shopify/products";
 import { ProductRow } from "@/components/product-row";
@@ -16,12 +17,12 @@ export const metadata = {
 
 export default function ProductsPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <div>
       <h1 className="mb-6 text-2xl font-semibold">Products from Shopify</h1>
       <Suspense fallback={<p className="text-zinc-500">Loading products…</p>}>
         <ProductList />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
@@ -35,19 +36,9 @@ async function ProductList() {
     return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
-  const [store] = await sql<{ shopify_domain: string }[]>`
-    SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
+  const store = await getStoreForOrg(orgId);
   if (!store) {
-    return (
-      <p className="text-zinc-500">
-        No store connected.{" "}
-        <Link href="/connect-store" className="underline">
-          Connect a store
-        </Link>
-        .
-      </p>
-    );
+    return <ConnectStorePrompt description="Connect your store to see all your products" />;
   }
 
   let products: Awaited<ReturnType<typeof getProducts>>;

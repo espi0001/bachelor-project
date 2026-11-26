@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { sql } from '@/lib/db';
+import { getStoreForOrg } from '@/lib/store';
 
 export const metadata = {
   title: 'Store connected',
@@ -14,11 +14,11 @@ export const metadata = {
 
 export default function StoreConnectedPage({ searchParams }: PageProps<'/connect-store/connected'>) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="">
       <Suspense fallback={<p className="text-zinc-500">Loading…</p>}>
         <StoreConnected searchParams={searchParams} />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
@@ -27,10 +27,8 @@ async function StoreConnected({ searchParams }: Pick<PageProps<'/connect-store/c
   const { orgId } = await auth.protect();
   if (!orgId) redirect('/dashboard');
 
-  const [store] = await sql<{ name: string; shopify_domain: string }[]>`
-    SELECT name, shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
-  // Only an org with a store has something to confirm. /dashboard sends everyone else to the right place.
+  const store = await getStoreForOrg(orgId);
+  // Only an org with a store has something to confirm.
   if (!store) redirect('/dashboard');
 
   const { reconnect } = await searchParams;

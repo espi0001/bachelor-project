@@ -2,9 +2,9 @@
    `typography-heading-section` instead of size + line height + weight.
    Source: Figma "Bachelor-projekt" (Op1pBDGz23Q7CpGmMToXme), Style guide frame 148:571. */
 
-/* Heading/Page title — 24 / 32 Medium */
+/* Heading/Page title — 28 / 36 Medium */
 @utility typography-heading-page {
-    @apply text-2xl font-medium;
+    @apply text-2xl2 font-medium;
 }
 
 /* Heading/Section — 18 / 28 Semibold */
@@ -17,23 +17,22 @@
     @apply text-base font-normal;
 }
 
-/* Body/Small — 14 / 20 Regular */
+/* Body/Small — 16 / 24 Regular */
 @utility typography-body-sm {
-    @apply text-sm font-normal;
+    @apply text-base font-normal;
 }
 
-/* Label/Default — 14 / 20 Medium */
+/* Label/Default — 16 / 24 Medium */
 @utility typography-label {
+    @apply text-base font-medium;
+}
+
+/* Label/Small — 14 / 24 Medium */
+@utility typography-label-sm {
     @apply text-sm font-medium;
 }
 
-/* Label/Small — 13 / 18 Medium. Tailwind has no 13px step and this is the only role
-   that uses it, so the value stays here instead of becoming a token. */
-@utility typography-label-sm {
-    @apply text-[0.8125rem]/[1.125rem] font-medium;
-}
-
-/* Caption — 12 / 16 Regular */
+/* Caption — 16 / 24 Regular */
 @utility typography-caption {
-    @apply text-xs font-normal;
+    @apply text-base font-normal;
 }

@@ -17,6 +17,7 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - **Tydelig frem for smart.** Skal man læse koden to gange, er den for smart.
 - **Hold dig til ticketen.** Alt andet er en ny ticket. Sig det.
 - **Følg `project-conventions`.** Læs skillen, før du skriver kode. Kode og kommentarer er på engelsk, selv om ticketen og planen er på dansk.
+- **Brug ordene fra `GLOSSARY.md`** i navne, UI-tekst og planen. Mangler et begreb, så foreslå det i planen.
 - **Next.js 16.** API'erne er anderledes end i det meste træningsdata. Læs guiden i `node_modules/next/dist/docs/`, før du bruger en API, du er i tvivl om (se `AGENTS.md`).
 
 ## Trin
@@ -25,20 +26,13 @@ Byg Jira-ticketen `$ARGUMENTS` i dette repo. Står der ikke en nøgle her (fx i 
 - Hent den med Atlassian MCP (esterworkwork.atlassian.net, projekt **BA**). Er MCP ikke forbundet, så bed brugeren indsætte ticketen. Gæt ikke.
 - Læs titel, beskrivelse, acceptkriterier, kommentarer og links (fx Figma). Nyeste kommentar vinder, hvis noget modsiger beskrivelsen. Sig det.
 - **Mangler beskrivelse eller acceptkriterier: stop.** Brug skillen `jira-ticket-tjek` først.
+- **Er ticketen større end 1–2 dages arbejde: stop.** Foreslå at dele den op i vertikale stykker med `jira-ticket-tjek`.
 - Er det en epic, så list under-tickets og spørg, hvilken der skal laves.
 
-### 2. Foreslå et branch-navn
-Brugeren laver selv branchen og står selv for commit, push og PR. Gør aldrig noget af det selv: foreslå kun navnet.
-
-Format: `<prefix>/BA-<nr>-<kort-beskrivelse>`
-
-| Type | Prefix | Eksempel |
-|---|---|---|
-| Ny funktion | `feature/` | `feature/BA-139-clerk-login-flow` |
-| Fejl | `fix/` | `fix/BA-140-upload-fejlbesked` |
-| Opsætning, opdateringer | `chore/` | `chore/BA-110-eslint-config` |
-
-Beskrivelsen er højst 6 ord i kebab-case.
+### 2. Find branch-navnet
+Brugeren laver selv branchen og står selv for commit, push og PR. Gør aldrig noget af det selv.
+- Brug navnet fra ticketens felt **Branch:**.
+- Mangler det, så foreslå et efter formatet i `jira-ticket-tjek` (Tjekliste → Branch), og tilbyd at skrive det i ticketen.
 
 ### 3. Plan
 Læs de relevante filer først. Vis så:
@@ -59,11 +53,10 @@ Når brugeren har valgt en mulighed, så tilbyd at logge valget i "Overvejelser 
 
 ### 5. Tjek
 1. `npm run dev` og tjek **hvert acceptkriterie** i browseren: mobil og desktop, kun tastatur, og ingen fejl i konsollen.
-2. Gennemgå koden som en kritisk reviewer:
-   - Opfylder koden kriterierne, eller ser det bare sådan ud?
-   - Server/Client: er `"use client"` kun brugt, hvor det er nødvendigt?
+2. Kør skillen `kode-review` mod `main` (Standarder og Spec). Ret fund i filer, du har ændret. Andre fund nævnes i opsummeringen.
+   Tjek også selv det, reviewet ikke ser i diffen:
    - Tomme eller manglende data håndteret?
-   - Tilgængelighed: semantisk HTML, labels, alt-tekst, synligt fokus.
+   - Tilgængelighed i browseren: labels, alt-tekst, synligt fokus.
 3. Kør:
    ```bash
    npm run lint
@@ -105,4 +98,5 @@ Skriv kun "OK" for det, du faktisk har tjekket. Kunne du ikke tjekke noget (fx i
 - Hvad er ændret, og hvorfor.
 - Tabel: acceptkriterie → hvordan det er tjekket → OK / ikke OK. Henvis til `.agent-notes/BA-<nr>.md`.
 - Åbne punkter og forslag til nye tickets.
+- Resultatet af `kode-review` (antal fund pr. akse, og hvad der er rettet).
 - Forslag til PR-titel: `BA-<nr>: <titel>`, og at `/pr-desc` kan skrive beskrivelsen.

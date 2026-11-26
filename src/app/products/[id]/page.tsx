@@ -8,7 +8,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
 import { GenerateImagesDialog } from "@/components/generate-images-dialog";
-import { sql } from "@/lib/db";
+import { ConnectStorePrompt } from "@/components/connect-store-prompt";
+import { getStoreForOrg } from "@/lib/store";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProduct, productIdFromUrl, type Product } from "@/lib/shopify/products";
 
@@ -18,14 +19,14 @@ export const metadata = {
 
 export default function ProductPage({ params }: PageProps<"/products/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
+    <div className="">
       {/* With cacheComponents, params are request data and must be read inside Suspense. */}
       <Suspense fallback={<p className="text-zinc-500">Loading product…</p>}>
         {params.then(({ id }) => (
           <ProductDetail urlId={id} />
         ))}
       </Suspense>
-    </main>
+    </div>
   );
 }
 
@@ -39,19 +40,9 @@ async function ProductDetail({ urlId }: { urlId: string }) {
     return <p className="text-zinc-500">Select an organization first.</p>;
   }
 
-  const [store] = await sql<{ shopify_domain: string }[]>`
-    SELECT shopify_domain FROM store WHERE auth_org_id = ${orgId} LIMIT 1
-  `;
+  const store = await getStoreForOrg(orgId);
   if (!store) {
-    return (
-      <p className="text-zinc-500">
-        No store connected.{" "}
-        <Link href="/connect-store" className="underline">
-          Connect a store
-        </Link>
-        .
-      </p>
-    );
+    return <ConnectStorePrompt description="Connect your store to see this product" />;
   }
 
   // The ID comes from the URL, so anyone can change it. Only plain numbers are valid,

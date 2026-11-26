@@ -35,7 +35,7 @@ export function ConnectStoreWizard({ redirectUrls, initialError, reconnectValues
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-160">
       <Stepper current={step} />
 
       <section className="flex flex-col gap-4 rounded-lg border border-black/10 p-6 dark:border-white/15">

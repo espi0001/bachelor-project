@@ -4,11 +4,20 @@
    so text looks the same on Mac, Windows and Android (the system font is SF Pro on a Mac
    but Segoe UI on Windows, which has no Medium weight).
 
-   Font sizes and line heights are Tailwind's defaults, which already match Figma
-   (text-xs 12/16, text-sm 14/20, text-base 16/24, text-lg 18/28, text-2xl 24/32).
-   The type roles are composed in utilities-typography.css. */
+   Font sizes and line heights are Tailwind's defaults where they already match Figma
+   (text-base 16/24, text-lg 18/28, text-2xl 24/32). Steps Tailwind lacks are added below.
+   The type roles are composed in utilities-typography.css; don't reach for a raw `text-*`
+   at a call site. */
 
 /* `inline` because --font-inter is set by next/font on <html>, not in this file. */
 @theme inline {
     --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Extra font sizes. Tailwind's stock scale stays, because pages still use text-3xl and up.
+   `--text-*--line-height` gives each size its own line height, as Tailwind does for its own. */
+@theme {
+    /* 28/36, Heading/Page title. Named `2xl2` because it sits between `2xl` (24) and `3xl` (30). */
+    --text-2xl2: 1.75rem;
+    --text-2xl2--line-height: 2.25rem;
 }

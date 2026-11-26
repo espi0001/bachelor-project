@@ -13,7 +13,7 @@ const secondaryButton =
   // TODO: Make a frontpage design
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-16 sm:py-24">
+    <div className="mx-auto w-full max-w-6xl flex-1 py-8">
       <p className="mb-8 inline-flex items-center gap-3 rounded-full border border-black/10 px-4 py-2 text-xs font-medium uppercase tracking-wider text-zinc-600 dark:border-white/15 dark:text-zinc-400">
         <span aria-hidden="true" className="h-2 w-2 rounded-full bg-indigo-600" />
         Product image review
@@ -34,7 +34,7 @@ export default function Home() {
           <CallToAction />
         </Suspense>
       </div>
-    </main>
+    </div>
   );
 }
 
