@@ -71,7 +71,7 @@ export async function approveImage(imageIdFromBrowser: string): Promise<Approval
   }
 
   // 4. Upload. From here on the image is approved, whatever happens to the upload.
-  const result = await uploadToShopify(imageId, image);
+  const result = await uploadToShopify(imageId, orgId, image);
 
   // 5. Load the page again, also when the upload failed: the row is no longer a draft, so the card
   // must change to "Upload failed" with Retry now, not only after a reload.
@@ -115,7 +115,7 @@ export async function retryUpload(imageIdFromBrowser: string): Promise<ApprovalR
     return { ok: false, error: "The upload could not be retried. Try again." };
   }
 
-  const result = await uploadToShopify(imageId, image);
+  const result = await uploadToShopify(imageId, orgId, image);
 
   // 4. Load the page again, so the card disappears on success, or shows the latest state on failure.
   refresh();
@@ -125,24 +125,32 @@ export async function retryUpload(imageIdFromBrowser: string): Promise<ApprovalR
 /**
  * Adds an approved image to its product in Shopify and records the upload. Shared by approve and retry.
  * Callers have already checked that the image belongs to the org and marked the upload as started.
+ * The queries here still filter on the org, so they stay safe if a new caller forgets that check.
  * If the upload fails, the mark is removed again, so the image can be retried or rejected straight away.
  */
-async function uploadToShopify(imageId: string, image: ImageToUpload): Promise<ApprovalResult> {
-  const result = await tryUpload(imageId, image);
-  if (!result.ok) await releaseUpload(imageId);
+async function uploadToShopify(imageId: string, orgId: string, image: ImageToUpload): Promise<ApprovalResult> {
+  const result = await tryUpload(imageId, orgId, image);
+  if (!result.ok) await releaseUpload(imageId, orgId);
   return result;
 }
 
 /** Removes the "upload started" mark. If that fails, the image becomes retryable after UPLOAD_TIMEOUT instead. */
-async function releaseUpload(imageId: string): Promise<void> {
+async function releaseUpload(imageId: string, orgId: string): Promise<void> {
   try {
-    await sql`UPDATE generated_image SET upload_started_at = NULL WHERE id = ${imageId}`;
+    await sql`
+      UPDATE generated_image gi
+      SET upload_started_at = NULL
+      FROM store s
+      WHERE gi.id = ${imageId}
+        AND gi.store_id = s.id
+        AND s.auth_org_id = ${orgId}
+    `;
   } catch (e) {
     console.error(`Could not clear upload_started_at on image ${imageId}. It can be retried after ${UPLOAD_TIMEOUT}:`, e);
   }
 }
 
-async function tryUpload(imageId: string, image: ImageToUpload): Promise<ApprovalResult> {
+async function tryUpload(imageId: string, orgId: string, image: ImageToUpload): Promise<ApprovalResult> {
   // 1. Upload.
   let mediaId: string;
   try {
@@ -176,11 +184,16 @@ async function tryUpload(imageId: string, image: ImageToUpload): Promise<Approva
 
   // 2. Record the upload.
   try {
-    await sql`
-      UPDATE generated_image
+    const updated = await sql`
+      UPDATE generated_image gi
       SET shopify_media_id = ${mediaId}, uploaded_at = now(), upload_started_at = NULL
-      WHERE id = ${imageId}
+      FROM store s
+      WHERE gi.id = ${imageId}
+        AND gi.store_id = s.id
+        AND s.auth_org_id = ${orgId}
     `;
+    // Should not happen, since the caller claimed this row. Treated like a failed save rather than ignored.
+    if (updated.count === 0) throw new Error(`No row matched image ${imageId} in org ${orgId}`);
   } catch (e) {
     // The image is in Shopify, but the database does not know. A retry would add it twice.
     console.error(`Image ${imageId} is in Shopify as ${mediaId}, but saving that failed:`, e);
