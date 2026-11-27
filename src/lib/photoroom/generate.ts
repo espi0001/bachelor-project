@@ -18,8 +18,8 @@ const DEFAULT_LIFESTYLE_PROMPT =
  * also gave the best packshots of other products, so it is used for every product type.
  * Docs: https://docs.photoroom.com/image-editing-api-plus-plan/ghost-mannequin
  */
-export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
-  return photoroomEdit(imageUrl, {
+export function generatePackshot(image: Blob): Promise<PhotoroomResult> {
+  return photoroomEdit(image, {
     "ghostMannequin.mode": "ai.auto",
     "ghostMannequin.size": "SQUARE_HD",
   });
