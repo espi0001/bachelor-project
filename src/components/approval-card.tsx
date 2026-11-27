@@ -28,7 +28,8 @@ type ApprovalCardProps = {
   headingLevel?: "h2" | "h3";
   /** Null if the product was deleted in Shopify. */
   productTitle: string | null;
-  originalUrl: string;
+  /** A Shopify image, or a signed link to a source uploaded from the device. Null if that file is missing in Storage. */
+  originalUrl: string | null;
   /** Null if the file is missing in Storage, so no signed link could be made. */
   generatedUrl: string | null;
 };
@@ -65,13 +66,19 @@ export function ApprovalCard({
     <div className="@container">
       <article className="flex flex-col gap-6 rounded-lg border border-default bg-surface p-6 @3xl:flex-row @3xl:items-center">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 @3xl:flex @3xl:gap-6">
-          <Image
-            src={originalUrl}
-            alt={`Original image of ${productName}`}
-            width={352}
-            height={352}
-            className={IMAGE_BOX_CLASSES}
-          />
+          {originalUrl ? (
+            <Image
+              src={originalUrl}
+              alt={`Original image of ${productName}`}
+              width={352}
+              height={352}
+              // Shopify images go through the image optimizer. A signed Storage link expires, so it is not cached.
+              unoptimized={!originalUrl.startsWith("https://cdn.shopify.com/")}
+              className={IMAGE_BOX_CLASSES}
+            />
+          ) : (
+            <PreviewUnavailable />
+          )}
           {/* Decorative: the alt texts already say which image is the original and which is generated. */}
           <span aria-hidden="true" className="typography-heading-section text-secondary">
             →
@@ -87,11 +94,7 @@ export function ApprovalCard({
               className={IMAGE_BOX_CLASSES}
             />
           ) : (
-            <div
-              className={`${IMAGE_BOX_CLASSES} flex items-center justify-center p-2 text-center typography-caption text-secondary`}
-            >
-              Preview unavailable
-            </div>
+            <PreviewUnavailable />
           )}
         </div>
 
@@ -140,6 +143,17 @@ export function ApprovalCard({
           </div>
         )}
       </article>
+    </div>
+  );
+}
+
+/** Takes an image's place when its file is missing, so the layout stays the same. */
+function PreviewUnavailable() {
+  return (
+    <div
+      className={`${IMAGE_BOX_CLASSES} flex items-center justify-center p-2 text-center typography-caption text-secondary`}
+    >
+      Preview unavailable
     </div>
   );
 }

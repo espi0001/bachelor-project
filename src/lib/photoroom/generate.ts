@@ -17,8 +17,8 @@ const DEFAULT_LIFESTYLE_PROMPT =
  * Photoroom builds it for clothing; other products are allowed but may give weaker results.
  * Docs: https://docs.photoroom.com/image-editing-api-plus-plan/flat-lay
  */
-export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
-  return photoroomEdit(imageUrl, {
+export function generatePackshot(image: Blob): Promise<PhotoroomResult> {
+  return photoroomEdit(image, {
     "flatLay.mode": "ai.auto",
     "flatLay.size": "SQUARE_HD",
   });
@@ -30,10 +30,10 @@ export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
  * Docs: https://docs.photoroom.com/image-editing-api-plus-plan/ai-backgrounds
  */
 export function generateLifestyleImage(
-  imageUrl: string,
+  image: Blob,
   visualToneOfVoice: string | null,
 ): Promise<PhotoroomResult> {
-  return photoroomEdit(imageUrl, {
+  return photoroomEdit(image, {
     // Keeps the product at its original size and place, as in Photoroom's AI background examples.
     referenceBox: "originalImage",
     "background.prompt": visualToneOfVoice || DEFAULT_LIFESTYLE_PROMPT,

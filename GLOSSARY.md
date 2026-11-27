@@ -15,6 +15,9 @@ Faste begreber i projektet. Brug de samme ord i kode, UI, Jira, rapporten og sam
 
 ## Begreber
 
+**Kildebillede** (`sourceImage`) – det billede, et genereret billede laves ud fra: ét af produktets billeder i Shopify eller et billede uploadet fra brugerens enhed.
+*Undgå:* originalbillede, grundbillede, inputbillede
+
 **Livsstilsbillede** (`lifestyleImage`) – et billede, der viser produktet i brug eller i et miljø.
 *Undgå:* stemningsbillede, lifestyle-billede
 

@@ -11,8 +11,8 @@ import { flushSync } from "react-dom";
 import { generateImage, type GenerateImageResult } from "@/app/products/[id]/actions";
 import { ApprovalCard, type ApprovalChange } from "@/components/approval-card";
 import { DialogStep } from "@/components/generate-form/dialog-step";
-import { ImageTypeOption } from "@/components/generate-form/image-type-option";
-import { SourceImagePicker } from "@/components/generate-form/source-image-picker";
+import { ImageTypeOption, type SourcePreview } from "@/components/generate-form/image-type-option";
+import { SourceImagePicker, type PickedSource } from "@/components/generate-form/source-image-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -36,9 +36,9 @@ export function GenerateImagesDialog({
 }: {
   productUrlId: string;
   productTitle: string;
-  /** The product's images from Shopify, which the user can choose a source from. */
+  /** The product's images from Shopify, which the user can choose a source from. May be empty: then only upload works. */
   sourceImages: ProductImage[];
-  /** When set, the button is disabled and this text explains why (e.g. no source image yet). */
+  /** When set, the button is disabled and this text explains why. */
   disabledReason?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -46,10 +46,12 @@ export function GenerateImagesDialog({
   // Each type's Change button, so focus can go back to it when the user leaves the source picker.
   const changeButtonRefs = useRef<Partial<Record<ImageType, HTMLButtonElement | null>>>({});
   const [selected, setSelected] = useState<ImageType[]>(["packshot"]);
-  // The source image ID per type. Starts as the product's first image; unchecking a type keeps its choice.
-  const [sources, setSources] = useState<Record<ImageType, string>>(() =>
-    Object.fromEntries(IMAGE_TYPES.map((type) => [type, sourceImages[0]?.id ?? ""])) as Record<ImageType, string>,
-  );
+  // The source per type, chosen separately for each. Starts as the product's first Shopify image, or none if it has
+  // no images. Unchecking a type keeps its choice.
+  const [sources, setSources] = useState<Record<ImageType, PickedSource | null>>(() => {
+    const first: PickedSource | null = sourceImages[0] ? { kind: "shopify", imageId: sourceImages[0].id } : null;
+    return Object.fromEntries(IMAGE_TYPES.map((type) => [type, first])) as Record<ImageType, PickedSource | null>;
+  });
   const [status, setStatus] = useState<Status>("choosing");
   // The type whose source is being chosen. While set, the source picker replaces the list of image types.
   const [pickingFor, setPickingFor] = useState<ImageType | null>(null);
@@ -65,6 +67,15 @@ export function GenerateImagesDialog({
   const total = selected.length;
   const imagesLabel = `${total} image${total === 1 ? "" : "s"}`;
   const generatedCount = results.filter((r) => r.ok).length;
+  const isMissingSource = selected.some((type) => !sources[type]);
+
+  /** What a type's source looks like in the dialog. Null if it has none, or its Shopify image is gone. */
+  function previewOf(source: PickedSource | null): SourcePreview | null {
+    if (!source) return null;
+    if (source.kind === "upload") return { url: source.previewUrl, label: "From device", isLocal: true };
+    const image = sourceImages.find((i) => i.id === source.imageId);
+    return image ? { url: image.url, label: "From Shopify", isLocal: false } : null;
+  }
 
   function open() {
     setPickingFor(null);
@@ -89,10 +100,10 @@ export function GenerateImagesDialog({
     titleRef.current?.focus();
   }
 
-  /** Leaves the picker. With an image ID, it becomes the type's source; without one (Back), nothing is saved. */
-  function closePicker(type: ImageType, imageId?: string) {
+  /** Leaves the picker. With a source, it becomes the type's source; without one (Back), nothing is saved. */
+  function closePicker(type: ImageType, source?: PickedSource) {
     flushSync(() => {
-      if (imageId) setSources((current) => ({ ...current, [type]: imageId }));
+      if (source) setSources((current) => ({ ...current, [type]: source }));
       setPickingFor(null);
     });
     changeButtonRefs.current[type]?.focus();
@@ -114,8 +125,15 @@ export function GenerateImagesDialog({
       // One call per image type, so the progress bar can count real progress.
       for (const [i, type] of types.entries()) {
         let result: GenerateImageResult;
+        // Only what the server needs: the preview link is a blob: link that only works in this browser.
+        const source = sources[type];
         try {
-          result = await generateImage(productUrlId, type, sources[type]);
+          if (!source) throw new Error(`No source for ${type}`);
+          result = await generateImage(
+            productUrlId,
+            type,
+            source.kind === "upload" ? { kind: "upload", path: source.path } : source,
+          );
         } catch {
           // The call itself failed (e.g. lost connection or the app was redeployed). Record it and carry on.
           result = { ok: false, error: "Could not reach the server. Try again." };
@@ -192,10 +210,11 @@ export function GenerateImagesDialog({
 
         {status === "choosing" && pickingFor && (
           <SourceImagePicker
+            productUrlId={productUrlId}
             typeLabel={IMAGE_TYPE_LABELS[pickingFor]}
             images={sourceImages}
-            currentImageId={sources[pickingFor]}
-            onUse={(imageId) => closePicker(pickingFor, imageId)}
+            current={sources[pickingFor]}
+            onUse={(source) => closePicker(pickingFor, source)}
             onBack={() => closePicker(pickingFor)}
           />
         )}
@@ -208,7 +227,7 @@ export function GenerateImagesDialog({
                   Image types
                 </h3>
                 <p className="typography-body-sm text-secondary">
-                  Choose the source image for each type from the product&apos;s images in Shopify.
+                  Choose the source image for each type from Shopify or your device.
                 </p>
               </>
             }
@@ -222,15 +241,19 @@ export function GenerateImagesDialog({
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {/* The count, or why Generate is disabled. The button points to this text when nothing is chosen. */}
                 <p id="generate-none-selected" className="mr-auto typography-body-sm text-secondary">
-                  {total === 0 ? "Choose at least one image type" : imagesLabel}
+                  {total === 0
+                    ? "Choose at least one image type"
+                    : isMissingSource
+                      ? "Choose a source image for each image type"
+                      : imagesLabel}
                 </p>
                 <Button variant="secondary" onClick={close}>
                   Cancel
                 </Button>
                 <Button
                   onClick={generate}
-                  disabled={total === 0}
-                  aria-describedby={total === 0 ? "generate-none-selected" : undefined}
+                  disabled={total === 0 || isMissingSource}
+                  aria-describedby={total === 0 || isMissingSource ? "generate-none-selected" : undefined}
                 >
                   Generate {imagesLabel}
                 </Button>
@@ -239,24 +262,19 @@ export function GenerateImagesDialog({
           >
             {/* A group instead of a fieldset, because its heading sits in the fixed part above the scroll area. */}
             <div role="group" aria-labelledby="image-types-heading" className="flex flex-col gap-3">
-              {IMAGE_TYPES.map((type) => {
-                const source = sourceImages.find((image) => image.id === sources[type]);
-                // Only missing if the product has no images, and then the Generate button is disabled.
-                if (!source) return null;
-                return (
-                  <ImageTypeOption
-                    key={type}
-                    label={IMAGE_TYPE_LABELS[type]}
-                    checked={selected.includes(type)}
-                    onCheckedChange={(checked) => toggle(type, checked)}
-                    source={source}
-                    onChangeSource={() => openPicker(type)}
-                    changeButtonRef={(button) => {
-                      changeButtonRefs.current[type] = button;
-                    }}
-                  />
-                );
-              })}
+              {IMAGE_TYPES.map((type) => (
+                <ImageTypeOption
+                  key={type}
+                  label={IMAGE_TYPE_LABELS[type]}
+                  checked={selected.includes(type)}
+                  onCheckedChange={(checked) => toggle(type, checked)}
+                  source={previewOf(sources[type])}
+                  onChangeSource={() => openPicker(type)}
+                  changeButtonRef={(button) => {
+                    changeButtonRefs.current[type] = button;
+                  }}
+                />
+              ))}
             </div>
           </DialogStep>
         )}
@@ -300,7 +318,7 @@ export function GenerateImagesDialog({
             <ul className="flex flex-col gap-2">
               {queue.map((type, i) => {
                 // Sources can only change while choosing, so this is the image the run uses.
-                const source = sourceImages.find((image) => image.id === sources[type]);
+                const source = previewOf(sources[type]);
                 return (
                   <li key={type} className="flex items-center gap-4 rounded-lg border border-default p-3">
                     {/* Empty alt: the text next to it says what the image is. */}
@@ -310,6 +328,7 @@ export function GenerateImagesDialog({
                         alt=""
                         width={56}
                         height={56}
+                        unoptimized={source.isLocal}
                         className="size-14 shrink-0 rounded-md bg-subtle object-contain"
                       />
                     ) : (
@@ -317,7 +336,7 @@ export function GenerateImagesDialog({
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="typography-label text-primary">{IMAGE_TYPE_LABELS[type]}</p>
-                      <p className="typography-body-sm text-secondary">Source: From Shopify</p>
+                      <p className="typography-body-sm text-secondary">Source: {source?.label ?? "Unknown"}</p>
                     </div>
                     <GenerateStatus result={results[i]} isCurrent={i === results.length} />
                   </li>

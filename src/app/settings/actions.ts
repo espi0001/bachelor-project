@@ -5,7 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { forgetAccessToken } from '@/lib/shopify/client';
-import { deleteGeneratedImages } from '@/lib/supabase/storage';
+import { deleteGeneratedImages, deleteSourceImages } from '@/lib/supabase/storage';
 import { ADMIN_ROLE } from '@/lib/roles';
 import { VISUAL_TONE_OF_VOICE_MAX_LENGTH } from './visual-tone-of-voice';
 
@@ -73,17 +73,22 @@ export async function disconnectStore(_prev: DisconnectStoreState, formData: For
   const storeId = String(formData.get('storeId') ?? '');
   if (!/^\d+$/.test(storeId)) return { error: 'The store could not be disconnected. Try again.' };
 
-  let deleted: { shopify_domain: string; storage_paths: string[] } | undefined;
+  type Deleted = { shopify_domain: string; storage_paths: string[]; source_storage_paths: string[] };
+  let deleted: Deleted | undefined;
   try {
     // Read the paths before the delete, because the cascade removes the rows that hold them.
-    [deleted] = await sql<{ shopify_domain: string; storage_paths: string[] }[]>`
+    // Uploaded sources that no generated image used are not in the table, so they stay in Storage (known gap, BA-150).
+    [deleted] = await sql<Deleted[]>`
       WITH paths AS (
-        SELECT COALESCE(array_agg(storage_path), '{}') AS storage_paths
+        SELECT COALESCE(array_agg(storage_path), '{}') AS storage_paths,
+               COALESCE(array_agg(DISTINCT source_storage_path) FILTER (WHERE source_storage_path IS NOT NULL), '{}')
+                 AS source_storage_paths
         FROM generated_image WHERE store_id = ${storeId}
       )
       DELETE FROM store
       WHERE id = ${storeId} AND auth_org_id = ${orgId}
-      RETURNING shopify_domain, (SELECT storage_paths FROM paths) AS storage_paths
+      RETURNING shopify_domain, (SELECT storage_paths FROM paths) AS storage_paths,
+                (SELECT source_storage_paths FROM paths) AS source_storage_paths
     `;
   } catch (e) {
     console.error('Failed to disconnect store', e);
@@ -101,9 +106,17 @@ export async function disconnectStore(_prev: DisconnectStoreState, formData: For
   // The store is already gone, so a failure here only leaves files behind. Log them for cleanup
   // instead of telling the user the disconnect failed.
   try {
-    await deleteGeneratedImages(deleted.storage_paths);
+    await Promise.all([
+      deleteGeneratedImages(deleted.storage_paths),
+      deleteSourceImages(deleted.source_storage_paths),
+    ]);
   } catch (e) {
-    console.error('Store disconnected, but its image files were not deleted', deleted.storage_paths, e);
+    console.error(
+      'Store disconnected, but its image files were not deleted',
+      deleted.storage_paths,
+      deleted.source_storage_paths,
+      e,
+    );
   }
 
   // Outside the try blocks: redirect() works by throwing, and a catch would swallow it.

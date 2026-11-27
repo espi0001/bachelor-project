@@ -7,7 +7,15 @@ import Image from "next/image";
 import { useId, type Ref } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import type { ProductImage } from "@/lib/shopify/products";
+
+/** What the row shows about a type's source image. */
+export type SourcePreview = {
+  url: string;
+  /** "From Shopify" or "From device". */
+  label: string;
+  /** True for a blob: link to a file on the device, which the image optimizer cannot fetch. */
+  isLocal: boolean;
+};
 
 export function ImageTypeOption({
   label,
@@ -21,8 +29,8 @@ export function ImageTypeOption({
   label: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
-  /** The image this type is generated from. */
-  source: ProductImage;
+  /** The image this type is generated from. Null until one is chosen (a product without Shopify images). */
+  source: SourcePreview | null;
   /** Called when the user clicks Change to pick another source. */
   onChangeSource: () => void;
   /** Lets the dialog move focus back to Change when the user leaves the source picker. */
@@ -54,20 +62,25 @@ export function ImageTypeOption({
       {checked && (
         <div className="mt-2 ml-8 flex items-center gap-4 rounded-lg border border-default p-3">
           {/* Empty alt: the text next to it says what the image is. */}
-          <Image
-            src={source.url}
-            alt=""
-            width={48}
-            height={48}
-            className="size-12 shrink-0 rounded-md bg-subtle object-contain"
-          />
+          {source ? (
+            <Image
+              src={source.url}
+              alt=""
+              width={48}
+              height={48}
+              unoptimized={source.isLocal}
+              className="size-12 shrink-0 rounded-md bg-subtle object-contain"
+            />
+          ) : (
+            <div aria-hidden="true" className="size-12 shrink-0 rounded-md bg-subtle" />
+          )}
           <div className="min-w-0 flex-1">
             <p className="typography-body-sm text-secondary">Source image</p>
-            <p className="typography-label text-primary">From Shopify</p>
+            <p className="typography-label text-primary">{source ? source.label : "None chosen yet"}</p>
           </div>
-          {/* Described by the type's label, so a screen reader hears which type the Change is for. */}
+          {/* Described by the type's label, so a screen reader hears which type the button is for. */}
           <Button ref={changeButtonRef} variant="secondary" onClick={onChangeSource} aria-describedby={labelId}>
-            Change
+            {source ? "Change" : "Choose"}
           </Button>
         </div>
       )}
