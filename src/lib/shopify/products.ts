@@ -9,7 +9,7 @@ export type ProductImage = {
   id: string;
   url: string;
   altText: string | null;
-  /** Pixels. Null if Shopify hasn't finished processing the image yet. */
+  /** Pixels. Null when Shopify does not host the image, so the size is unknown. */
   width: number | null;
   height: number | null;
 };
@@ -27,8 +27,8 @@ const PRODUCTS_PAGE_SIZE = 50;
 // single-product query gets every image in one request without paginating.
 const IMAGES_PER_PRODUCT = 250;
 // The list stays lower: Shopify rejects queries whose estimated cost is over 1,000 points, and the
-// estimate multiplies products by media. The list only needs the first image and the count.
-const IMAGES_PER_PRODUCT_IN_LIST = 50;
+// estimate multiplies products by media. Images after the first 50 are not returned.
+export const IMAGES_PER_PRODUCT_IN_LIST = 50;
 
 const PRODUCT_GID_PREFIX = "gid://shopify/Product/";
 
