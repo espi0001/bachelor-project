@@ -1,7 +1,7 @@
 'use server';
 /**
- * Server action that generates one image of a given type for a product, from the product's first image,
- * and saves it in Supabase Storage with a row in generated_image.
+ * Server action that generates one image of a given type for a product, from a source image the user chose
+ * among the product's images, and saves it in Supabase Storage with a row in generated_image.
  */
 
 import { randomUUID } from "node:crypto";
@@ -46,18 +46,20 @@ const EXTENSIONS: Record<string, string> = {
 };
 
 /**
- * Generates one image and saves it. The browser only sends which product and which type;
- * the server checks access and finds the source image itself, because anything
- * sent from the browser can be changed.
+ * Generates one image and saves it. The browser only sends which product, which type and the ID of the
+ * source image; the server checks access and looks the source image up among the product's images itself,
+ * because anything sent from the browser can be changed.
  */
 export async function generateImage(
   productUrlIdFromBrowser: string,
   type: ImageType,
+  sourceImageIdFromBrowser: string,
 ): Promise<GenerateImageResult> {
   // 1. Validate input from the browser.
   if (!isImageType(type)) return { ok: false, error: "Unknown image type." };
   const productId = productIdFromUrl(String(productUrlIdFromBrowser));
   if (!productId) return { ok: false, error: "Invalid product." };
+  const sourceImageId = String(sourceImageIdFromBrowser);
 
   let path: string;
   let imageId: string;
@@ -72,12 +74,13 @@ export async function generateImage(
     `;
     if (!store) return { ok: false, error: "No store connected." };
 
-    // 3. The product must exist in this org's store. The source image URL comes from Shopify, not the browser.
+    // 3. The product must exist in this org's store, and the source must be one of its images.
+    // Only the ID comes from the browser; the URL comes from Shopify.
     const product = await getProduct(store.shopify_domain, productId);
     if (!product) return { ok: false, error: "The product was not found in your store." };
 
-    const source = product.images[0];
-    if (!source) return { ok: false, error: "The product has no images to generate from." };
+    const source = product.images.find((image) => image.id === sourceImageId);
+    if (!source) return { ok: false, error: "Source image not found." };
     sourceImageUrl = source.url;
 
     // 4. Generate.
