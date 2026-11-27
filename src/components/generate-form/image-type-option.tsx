@@ -60,7 +60,8 @@ export function ImageTypeOption({
       </label>
 
       {checked && (
-        <div className="mt-2 ml-8 flex items-center gap-4 rounded-lg border border-default p-3">
+        <div className="mt-2 flex items-center gap-3 rounded-lg border border-default p-3 sm:ml-8 sm:gap-4">
+          {/* No indent and a smaller thumbnail on mobile, so the label and button fit next to each other. */}
           {/* Empty alt: the text next to it says what the image is. */}
           {source ? (
             <Image
@@ -69,13 +70,14 @@ export function ImageTypeOption({
               width={48}
               height={48}
               unoptimized={source.isLocal}
-              className="size-12 shrink-0 rounded-md bg-subtle object-contain"
+              className="size-10 shrink-0 rounded-md bg-subtle object-contain sm:size-12"
             />
           ) : (
-            <div aria-hidden="true" className="size-12 shrink-0 rounded-md bg-subtle" />
+            <div aria-hidden="true" className="size-10 shrink-0 rounded-md bg-subtle sm:size-12" />
           )}
           <div className="min-w-0 flex-1">
-            <p className="typography-body-sm text-secondary">Source image</p>
+            {/* Hidden on mobile, where it wraps and squeezes the button; the thumbnail and label say enough. */}
+            <p className="typography-body-sm text-secondary max-sm:hidden">Source image</p>
             <p className="typography-label text-primary">{source ? source.label : "None chosen yet"}</p>
           </div>
           {/* Described by the type's label, so a screen reader hears which type the button is for. */}

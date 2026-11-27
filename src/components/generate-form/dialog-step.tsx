@@ -27,20 +27,25 @@ export function DialogStep({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {top && <div className="shrink-0 pb-3">{top}</div>}
+      {/* On mobile there is no room to keep top and bottom fixed, so they scroll together with the list and only the
+          footer stays. From sm up this wrapper does not scroll; the list below has its own scroll area. */}
+      <div className="flex min-h-0 flex-1 flex-col max-sm:-mx-1 max-sm:overflow-y-auto max-sm:px-1">
+        {top && <div className="shrink-0 pb-3">{top}</div>}
 
-      {/* min-h-24 keeps the list visible on very low screens; the dialog itself scrolls instead.
-          The negative margin and padding leave room for focus outlines, which the scroll area would otherwise cut off. */}
-      <div
-        className="-mx-1 min-h-24 flex-1 overflow-y-auto px-1 py-1 focus-ring"
-        {...(scrollLabel ? { tabIndex: 0, role: "region", "aria-label": scrollLabel } : {})}
-      >
-        {children}
+        {/* sm:min-h-24 keeps the list visible on low screens; the dialog itself scrolls instead.
+            The negative margin and padding leave room for focus outlines, which a scroll area would otherwise cut off.
+            On mobile a focused list still scrolls with the arrow keys, because the browser scrolls the wrapper around it. */}
+        <div
+          className="py-1 focus-ring sm:-mx-1 sm:min-h-24 sm:flex-1 sm:overflow-y-auto sm:px-1"
+          {...(scrollLabel ? { tabIndex: 0, role: "region", "aria-label": scrollLabel } : {})}
+        >
+          {children}
+        </div>
+
+        {bottom && <div className="shrink-0 pt-4">{bottom}</div>}
       </div>
 
-      {bottom && <div className="shrink-0 pt-4">{bottom}</div>}
-
-      <div className="mt-6 shrink-0 border-t border-default pt-6">{footer}</div>
+      <div className="mt-4 shrink-0 border-t border-default pt-4 sm:mt-6 sm:pt-6">{footer}</div>
     </div>
   );
 }
