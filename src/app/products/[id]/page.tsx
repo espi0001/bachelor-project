@@ -98,13 +98,8 @@ async function ProductDetail({ urlId }: { urlId: string }) {
           <h2 id="product-images-heading" className="text-lg font-semibold">
             Product images
           </h2>
-          {/* Disabled without images: the source must be one of the product's images until upload exists. */}
-          <GenerateImagesDialog
-            productUrlId={urlId}
-            productTitle={product.title}
-            sourceImages={product.images}
-            disabledReason={imageCount === 0 ? "Add an image to generate from" : undefined}
-          />
+          {/* Works without Shopify images too: the source can be uploaded from the device (BA-150). */}
+          <GenerateImagesDialog productUrlId={urlId} productTitle={product.title} sourceImages={product.images} />
         </div>
 
         {imageCount === 0 ? (

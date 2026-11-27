@@ -10,7 +10,7 @@ import { sql } from "@/lib/db";
 import { IMAGE_TYPE_LABELS, isImageType } from "@/lib/image-types";
 import { ShopifyAuthError } from "@/lib/shopify/client";
 import { getProductTitles } from "@/lib/shopify/products";
-import { createSignedImageUrls } from "@/lib/supabase/storage";
+import { createSignedImageUrls, createSignedSourceImageUrls } from "@/lib/supabase/storage";
 import { ApprovalCard } from "@/components/approval-card";
 import { UPLOAD_TIMEOUT } from "./upload-timeout";
 import { PageHeader } from "@/components/page-header";
@@ -36,7 +36,10 @@ type DraftImage = {
   id: string;
   shopify_product_id: string;
   type: string;
-  source_image_url: string;
+  /** Set for a source from Shopify. */
+  source_image_url: string | null;
+  /** Set for a source uploaded from the device, in the "source-images" bucket. */
+  source_storage_path: string | null;
   storage_path: string;
   /** True for an approved image that is being uploaded to Shopify right now. */
   uploading: boolean;
@@ -62,7 +65,7 @@ async function ApprovalContent() {
   // it stays here until it is in Shopify or rejected. Failed uploads come first, so they are not missed
   // below a long list of drafts.
   const drafts = await sql<DraftImage[]>`
-    SELECT gi.id, gi.shopify_product_id, gi.type, gi.source_image_url, gi.storage_path, uploading,
+    SELECT gi.id, gi.shopify_product_id, gi.type, gi.source_image_url, gi.source_storage_path, gi.storage_path, uploading,
            gi.status = 'approved' AND NOT uploading AS upload_failed
     FROM generated_image gi
     CROSS JOIN LATERAL (
@@ -105,7 +108,11 @@ async function ApprovalContent() {
     );
   }
 
-  const imageUrls = await createSignedImageUrls(drafts.map((d) => d.storage_path));
+  const sourcePaths = drafts.flatMap((d) => (d.source_storage_path ? [d.source_storage_path] : []));
+  const [imageUrls, sourceUrls] = await Promise.all([
+    createSignedImageUrls(drafts.map((d) => d.storage_path)),
+    createSignedSourceImageUrls(sourcePaths),
+  ]);
 
   return (
     <ul className="flex flex-col gap-4">
@@ -118,7 +125,9 @@ async function ApprovalContent() {
             // The type column is checked in the app, not the database, so an unknown value is shown as-is.
             typeLabel={isImageType(draft.type) ? IMAGE_TYPE_LABELS[draft.type] : draft.type}
             productTitle={titles.get(draft.shopify_product_id) ?? null}
-            originalUrl={draft.source_image_url}
+            originalUrl={
+              draft.source_image_url ?? (draft.source_storage_path && sourceUrls.get(draft.source_storage_path)) ?? null
+            }
             generatedUrl={imageUrls.get(draft.storage_path) ?? null}
           />
         </li>

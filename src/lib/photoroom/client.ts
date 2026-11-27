@@ -1,5 +1,5 @@
 /**
- * Server-only client for Photoroom's Image Editing API: sends an image URL plus options and returns the edited image.
+ * Server-only client for Photoroom's Image Editing API: sends an image file plus options and returns the edited image.
  * Every call to Photoroom goes through this file.
  */
 
@@ -29,26 +29,25 @@ function getApiKey(): string {
 }
 
 /**
- * Sends an image URL to Photoroom's /v2/edit endpoint with the given options
+ * Sends an image file to Photoroom's /v2/edit endpoint with the given options
  * (e.g. { "ghostMannequin.mode": "ai.auto" }) and returns the edited image.
  * Throws if Photoroom returns an error or the request times out.
  */
-export async function photoroomEdit(
-  imageUrl: string,
-  options: Record<string, string>,
-): Promise<PhotoroomResult> {
-  // Images given by URL must use GET with everything in the query string.
-  // POST only accepts an uploaded file (imageFile); that path is added when we build upload.
+export async function photoroomEdit(image: Blob, options: Record<string, string>): Promise<PhotoroomResult> {
+  // We always send the file, never a URL for Photoroom to fetch: Photoroom sometimes got errors from Shopify's CDN
+  // that our server does not get, and it cannot reach a local Supabase (127.0.0.1) in development.
+  // A file goes as multipart form data (imageFile), with the options as form fields.
   // Docs: https://docs.photoroom.com/getting-started/api-reference-openapi
-  const url = new URL(PHOTOROOM_EDIT_URL);
-  url.searchParams.set("imageUrl", imageUrl);
+  const body = new FormData();
+  body.set("imageFile", image);
   for (const [key, value] of Object.entries(options)) {
-    url.searchParams.set(key, value);
+    body.set(key, value);
   }
 
-  const res = await fetch(url, {
-    method: "GET",
+  const res = await fetch(PHOTOROOM_EDIT_URL, {
+    method: "POST",
     headers: { "x-api-key": getApiKey() },
+    body,
     cache: "no-store",
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
