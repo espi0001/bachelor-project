@@ -21,7 +21,7 @@ const DEFAULT_LIFESTYLE_PROMPT =
 export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
   return photoroomEdit(imageUrl, {
     "ghostMannequin.mode": "ai.auto",
-    "ghostMannequin.size": "SQUARE_HD",
+    "ghostMannequin.size": "PORTRAIT_HD_4_3",
   });
 }
 
