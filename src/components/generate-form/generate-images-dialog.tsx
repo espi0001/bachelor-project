@@ -351,8 +351,17 @@ export function GenerateImagesDialog({
                 <Button onClick={close}>Done</Button>
               </div>
             }
-            // Only error boxes when every image failed: nothing to focus, so the list itself must be focusable.
-            scrollLabel={generatedCount === 0 ? "Results" : undefined}
+            // Make the results keyboard-scrollable when no card has remaining actions.
+            scrollLabel={
+              results.some(
+                (result) =>
+                  result.ok &&
+                  changes[result.imageId] !== "uploaded" &&
+                  changes[result.imageId] !== "rejected",
+              )
+                ? undefined
+                : "Results"
+            }
           >
             <ul className="flex flex-col gap-4">
               {results.map((result) => {
