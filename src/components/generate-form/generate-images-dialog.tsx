@@ -169,18 +169,31 @@ export function GenerateImagesDialog({
         aria-labelledby="generate-dialog-title"
         // Close and Escape drop a pending source choice, so reopening starts on the list of image types.
         onClose={() => setPickingFor(null)}
-        // One fixed size for every step, so the dialog does not jump. The width keeps the approval cards side by side.
+        // Mobile: a full-screen drawer. h-dvh, not h-screen, so the footer is not hidden behind the browser's toolbar,
+        // and max-h/max-w-none because the browser's own dialog styles keep a margin to the window edge.
+        // sm and up: one fixed size for every step, so the dialog does not jump. The width keeps the approval cards side by side.
         // open:flex, not flex: a plain display class would override the browser hiding the closed dialog.
         // overflow-y-auto only matters on very low screens, where even the fixed parts do not fit.
-        className="m-auto h-[min(48rem,calc(100dvh-4rem))] w-full max-w-4xl flex-col overflow-y-auto rounded-xl bg-surface p-6 text-primary shadow-xl backdrop:bg-black/40 open:flex sm:p-8"
+        //
+        // The drawer slides up on open and down on close, in CSS only: starting: gives the open position to slide from,
+        // and transition-discrete keeps the dialog on screen (display, overlay) until the slide down is done.
+        // Firefox does not support the overlay transition yet, so it closes without sliding. No slide with reduced motion.
+        className={[
+          "m-0 h-dvh max-h-none w-full max-w-none flex-col overflow-y-auto bg-surface p-4 text-primary backdrop:bg-black/40 open:flex",
+          "sm:m-auto sm:h-[min(48rem,calc(100dvh-4rem))] sm:max-w-4xl sm:rounded-xl sm:p-8 sm:shadow-xl",
+          "max-sm:motion-safe:transition-[translate,display,overlay] max-sm:motion-safe:transition-discrete",
+          "max-sm:motion-safe:duration-300 max-sm:motion-safe:ease-[cubic-bezier(0.76,0,0.24,1)]",
+          "max-sm:not-open:translate-y-full max-sm:starting:open:translate-y-full",
+        ].join(" ")}
       >
-        <div className="mb-4 flex shrink-0 items-start justify-between gap-4">
+        <div className="mb-3 flex shrink-0 items-start justify-between gap-4 sm:mb-4">
           {/* tabIndex -1 lets openPicker() move focus here; it is not a tab stop. */}
           <h2
             ref={titleRef}
             id="generate-dialog-title"
             tabIndex={-1}
-            className="typography-heading-page focus:outline-none"
+            // Smaller on mobile, so a long product name does not take three lines.
+            className="typography-heading-section focus:outline-none sm:typography-heading-page"
           >
             {pickingFor ? "Choose source image" : `Generate images for ${productTitle}`}
           </h2>
@@ -189,14 +202,15 @@ export function GenerateImagesDialog({
           </Button>
         </div>
 
-        <ol aria-label="Steps" className="mb-6 flex shrink-0 flex-wrap gap-2">
+        <ol aria-label="Steps" className="mb-4 flex shrink-0 flex-wrap gap-1.5 sm:mb-6 sm:gap-2">
           {STEPS.map((step, i) => {
             const isCurrent = step.status === status;
             return (
               <li
                 key={step.status}
                 aria-current={isCurrent ? "step" : undefined}
-                className={`rounded-full px-3 py-1 typography-label ${
+                // Smaller on mobile, so all three steps fit on one line.
+                className={`rounded-full px-2.5 py-1 typography-label-sm sm:px-3 sm:typography-label ${
                   isCurrent
                     ? "bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900"
                     : "bg-subtle text-secondary"
@@ -239,18 +253,26 @@ export function GenerateImagesDialog({
             }
             footer={
               <div className="flex flex-wrap items-center justify-end gap-3">
-                {/* The count, or why Generate is disabled. The button points to this text when nothing is chosen. */}
-                <p id="generate-none-selected" className="mr-auto typography-body-sm text-secondary">
+                {/* The count, or why Generate is disabled. The button points to this text when it is disabled.
+                    The count is hidden on mobile, because the Generate button already says it. */}
+                <p
+                  id="generate-none-selected"
+                  className={`mr-auto typography-body-sm text-secondary ${
+                    total === 0 || isMissingSource ? "" : "max-sm:hidden"
+                  }`}
+                >
                   {total === 0
                     ? "Choose at least one image type"
                     : isMissingSource
                       ? "Choose a source image for each image type"
                       : imagesLabel}
                 </p>
-                <Button variant="secondary" onClick={close}>
+                {/* Hidden on mobile: Close in the header does the same, and the footer then fits on one line. */}
+                <Button variant="secondary" onClick={close} className="max-sm:hidden">
                   Cancel
                 </Button>
                 <Button
+                  className="max-sm:w-full"
                   onClick={generate}
                   disabled={total === 0 || isMissingSource}
                   aria-describedby={total === 0 || isMissingSource ? "generate-none-selected" : undefined}
