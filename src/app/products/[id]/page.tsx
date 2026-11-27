@@ -7,7 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { GenerateImagesDialog } from "@/components/generate-images-dialog";
+import { GenerateImagesDialog } from "@/components/generate-form/generate-images-dialog";
 import { ConnectStorePrompt } from "@/components/connect-store-prompt";
 import { getStoreForOrg } from "@/lib/store";
 import { ShopifyAuthError } from "@/lib/shopify/client";
@@ -98,10 +98,11 @@ async function ProductDetail({ urlId }: { urlId: string }) {
           <h2 id="product-images-heading" className="text-lg font-semibold">
             Product images
           </h2>
-          {/* Disabled without images for now: the first image is the only source until upload exists. */}
+          {/* Disabled without images: the source must be one of the product's images until upload exists. */}
           <GenerateImagesDialog
             productUrlId={urlId}
             productTitle={product.title}
+            sourceImages={product.images}
             disabledReason={imageCount === 0 ? "Add an image to generate from" : undefined}
           />
         </div>
