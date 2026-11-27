@@ -30,7 +30,7 @@ function getApiKey(): string {
 
 /**
  * Sends an image URL to Photoroom's /v2/edit endpoint with the given options
- * (e.g. { "flatLay.mode": "ai.auto" }) and returns the edited image.
+ * (e.g. { "ghostMannequin.mode": "ai.auto" }) and returns the edited image.
  * Throws if Photoroom returns an error or the request times out.
  */
 export async function photoroomEdit(
