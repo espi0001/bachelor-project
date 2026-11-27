@@ -13,14 +13,15 @@ const DEFAULT_LIFESTYLE_PROMPT =
   "a bright, natural everyday setting with soft daylight and a softly blurred background";
 
 /**
- * "Packshot" in our app: Photoroom's Flat Lay, a new top-down image of the product.
- * Photoroom builds it for clothing; other products are allowed but may give weaker results.
- * Docs: https://docs.photoroom.com/image-editing-api-plus-plan/flat-lay
+ * "Packshot" in our app: Photoroom's Ghost Mannequin, which redraws the garment without the model,
+ * as if worn by an invisible mannequin. Photoroom documents it for clothing, but in our tests it
+ * also gave the best packshots of other products, so it is used for every product type.
+ * Docs: https://docs.photoroom.com/image-editing-api-plus-plan/ghost-mannequin
  */
-export function generatePackshot(image: Blob): Promise<PhotoroomResult> {
-  return photoroomEdit(image, {
-    "flatLay.mode": "ai.auto",
-    "flatLay.size": "SQUARE_HD",
+export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
+  return photoroomEdit(imageUrl, {
+    "ghostMannequin.mode": "ai.auto",
+    "ghostMannequin.size": "SQUARE_HD",
   });
 }
 
