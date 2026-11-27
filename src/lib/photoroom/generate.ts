@@ -22,6 +22,8 @@ export function generatePackshot(imageUrl: string): Promise<PhotoroomResult> {
   return photoroomEdit(imageUrl, {
     "ghostMannequin.mode": "ai.auto",
     "ghostMannequin.size": "PORTRAIT_HD_4_3",
+    "background.color": "FFFFFF",
+    padding: "0.2",
   });
 }
 
