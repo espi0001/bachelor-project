@@ -20,8 +20,9 @@ export function VisualToneOfVoiceForm({ storeId, initialText }: VisualToneOfVoic
     {},
   );
   // Controlled on purpose: React resets an uncontrolled form after its action runs, which would put the
-  // old saved text back in the field. Also drives the character count.
-  const [text, setText] = useState(initialText ?? "");
+  // old saved text back in the field. Also drives the character count. \r\n becomes \n, the same as the
+  // save action does, so text saved before that fix still shows "Saved." after an unchanged save.
+  const [text, setText] = useState((initialText ?? "").replace(/\r\n/g, "\n"));
   // Only while the field still holds what was saved. Editing after a save, or during one, hides it again.
   const isSaved = !isPending && state.savedText !== undefined && state.savedText === text.trim();
 
